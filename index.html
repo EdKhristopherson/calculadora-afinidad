@@ -735,15 +735,32 @@
         document.body.classList.add('dark-mode');
       }
       
-      // Hacemos el pedido (fetch) a tu Google Sheet a través de la API
+      // 1. Intentar cargar datos guardados en localStorage para una visualización instantánea
+      const cachedData = localStorage.getItem('charactersData_cache');
+      if (cachedData) {
+        try {
+          const parsedData = JSON.parse(cachedData);
+          initWeb(parsedData);
+        } catch (e) {
+          console.error('Error al leer la caché local:', e);
+        }
+      }
+
+      // 2. Hacer el fetch a Google Sheets en segundo plano para buscar datos frescos
       fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
+          // Guardamos los datos nuevos en localStorage para la próxima vez
+          localStorage.setItem('charactersData_cache', JSON.stringify(data));
+          
+          // Actualizamos la web con los datos más recientes de la nube
           initWeb(data);
         })
         .catch(error => {
           console.error('Error al cargar los datos de Google Sheets:', error);
-          alert('Hubo un error al conectar con la base de datos.');
+          if (!cachedData) {
+            alert('Hubo un error al conectar con la base de datos.');
+          }
         });
     };
 
