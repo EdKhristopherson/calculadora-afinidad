@@ -503,7 +503,7 @@
         </div>
         
         <div class="section-title" data-i18n="bonoAfinidad">Bono de afinidad nivel 10</div>
-        <div class="badge-bonus" id="p1-bonus">Bono: -</div>
+        <div class="badge-bonus" id="p1-bonus">Bonus: -</div>
         
         <div class="section-title" id="p1-outfit-name" style="margin-top: 6px;" data-i18n="outfit">Outfit</div>
         <div class="outfit-container" id="p1-outfit-container">
@@ -667,7 +667,7 @@
   </div>
 
   <script>
-    // ⚠️ REEMPLAZA ESTE ENLACE con la URL de tu Web App de Google Apps Script (que termina en /exec)
+    // API App de Google Apps Script
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4o42FhIcR4mcGG1chHjHDjBu0IMTqyeCsUMrC-XHM_tdfp_QyfzQuZ1p-su4qMjksAA/exec';
 
     let charactersData = [];
@@ -728,14 +728,14 @@
       }
     };
 
-    let currentLang = 'es';
+    let currentLang = 'en';
 
     window.onload = function() {
       if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
       }
       
-      // 1. Intentar cargar datos guardados en localStorage para una visualización instantánea
+      // Cache para cargar datos 
       const cachedData = localStorage.getItem('charactersData_cache');
       if (cachedData) {
         try {
@@ -746,14 +746,14 @@
         }
       }
 
-      // 2. Hacer el fetch a Google Sheets en segundo plano para buscar datos frescos
+      // Hacer el fetch a Google Sheets en segundo plano 
       fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
           // Guardamos los datos nuevos en localStorage para la próxima vez
           localStorage.setItem('charactersData_cache', JSON.stringify(data));
           
-          // Actualizamos la web con los datos más recientes de la nube
+          // Actualizar la web con los datos más recientes de la nube
           initWeb(data);
         })
         .catch(error => {
