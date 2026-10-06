@@ -701,7 +701,7 @@
         nubesUsar: "Nubes a usar",
         cita: "¿Cita?",
         contarCita: "¿Contar cita?",
-        usarNube: "☁️ Usar nube del mueble",
+        usarNube: "☁️️ Usar nube del mueble",
         sinCitaMsg: "Este personaje no cuenta con sistema de citas"
       },
       en: {
@@ -750,10 +750,7 @@
       fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
-          // Guardamos los datos nuevos en localStorage para la próxima vez
           localStorage.setItem('charactersData_cache', JSON.stringify(data));
-          
-          // Actualizar la web con los datos más recientes de la nube
           initWeb(data);
         })
         .catch(error => {
@@ -771,11 +768,8 @@
     }
 
     function toggleLanguage() {
+      // Cambia al idioma opuesto
       currentLang = currentLang === 'es' ? 'en' : 'es';
-      const langBtn = document.getElementById('lang-btn');
-      if (langBtn) {
-        langBtn.innerText = currentLang === 'es' ? '🇺🇸 EN' : '🇪🇸 ES';
-      }
       aplicarTraducciones();
       recalculate();
       
@@ -789,10 +783,11 @@
         const key = el.getAttribute('data-i18n');
         if (t[key]) el.innerText = t[key];
       });
-      // Sincronizar el texto inicial del botón de idioma según el estado actual
+      
+      // Actualiza el botón para que refleje el idioma ACTUAL
       const langBtn = document.getElementById('lang-btn');
       if (langBtn) {
-        langBtn.innerText = currentLang === 'es' ? '🇺🇸 EN' : '🇪🇸 ES';
+        langBtn.innerText = currentLang === 'es' ? '🇪🇸 ES' : '🇺🇸 EN';
       }
     }
 
