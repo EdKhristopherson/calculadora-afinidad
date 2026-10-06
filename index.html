@@ -534,21 +534,22 @@
     .report-card-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
     }
 
-    /* Avatar del personaje con su barrita de progreso debajo */
+    /* Avatar del personaje con su barra de progreso debajo */
     .report-avatar-col {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      width: 80px;
+      width: 70px;
+      flex-shrink: 0;
     }
 
     .report-avatar-img {
-      width: 64px;
-      height: 64px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--border-color);
@@ -557,7 +558,7 @@
 
     .report-mini-spark {
       width: 100%;
-      height: 10px;
+      height: 8px;
       background-color: var(--border-color);
       border-radius: 4px;
       overflow: hidden;
@@ -570,6 +571,18 @@
       width: 0%;
     }
 
+    /* Imagen del ítem */
+    .report-card-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      object-fit: cover;
+      background-color: var(--border-color);
+      border: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    /* Bloque central de textos y metadatos */
     .report-card-info {
       display: flex;
       flex-direction: column;
@@ -622,6 +635,7 @@
       color: var(--text-muted);
     }
 
+    /* Grupo de la derecha: días, caja de costos y botón X */
     .report-card-right-group {
       display: flex;
       align-items: center;
@@ -635,6 +649,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
 
     .report-card-cost-box {
@@ -664,7 +679,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* Botón "X" chiquita para eliminar reporte */
+    /* Botón "X" para eliminar registro */
     .delete-report-btn {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
