@@ -279,7 +279,7 @@
 
     .affinity-icon {
       width: 16px;
-      height: 16px;
+      width: 16px;
       vertical-align: middle;
       object-fit: contain;
       margin-left: 3px;
@@ -409,12 +409,21 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Contenedores Interactivos Modernos (Switches nativos con label) */
+    /* Contenedores Interactivos Modernos (Switches con manejo de JS robusto) */
     .toggle-container {
       background-color: var(--accent-green-bg);
       border: 1px solid var(--accent-green-border);
       border-radius: 8px;
       margin-top: 8px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-green-text);
+      cursor: pointer;
+      user-select: none;
       transition: background-color 0.2s;
     }
 
@@ -423,32 +432,19 @@
       border: 1px solid var(--accent-purple-border);
       border-radius: 8px;
       margin-top: 8px;
-      transition: background-color 0.2s;
-    }
-
-    .toggle-label {
       padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
       font-weight: 600;
+      color: var(--accent-purple-text);
       cursor: pointer;
       user-select: none;
-      width: 100%;
-      box-sizing: border-box;
+      transition: background-color 0.2s;
     }
 
-    .toggle-container .toggle-label {
-      color: var(--accent-green-text);
-    }
-
-    .toggle-container-nube .toggle-label {
-      color: var(--accent-purple-text);
-    }
-
-    .toggle-container input[type="checkbox"],
-    .toggle-container-nube input[type="checkbox"] {
+    .toggle-container input[type="checkbox"] {
       cursor: pointer;
       width: 16px;
       height: 16px;
@@ -456,6 +452,9 @@
     }
 
     .toggle-container-nube input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
       accent-color: #8b5cf6;
     }
 
@@ -673,17 +672,13 @@
         <div class="metric-row total-cost-row"><span class="metric-label" data-i18n="costoTotalFons">Costo total de Fons</span><span class="metric-value" id="p2-costototal1">0</span></div>
         <div class="metric-row"><span class="metric-label" data-i18n="nubesUsar">Nubes a usar</span><span class="metric-value" id="p2-nubesusadas1">0</span></div>
         
-        <div class="toggle-container">
-          <label class="toggle-label" for="p2-cita1">
-            <span data-i18n="cita">¿Cita?</span>
-            <input type="checkbox" id="p2-cita1" checked onchange="syncCitas(1, this.checked)">
-          </label>
+        <div class="toggle-container" onclick="toggleCardCheckbox('p2-cita1', event)">
+          <span data-i18n="cita">¿Cita?</span>
+          <input type="checkbox" id="p2-cita1" checked onchange="syncCitas(1, this.checked)" onclick="event.stopPropagation()">
         </div>
-        <div class="toggle-container-nube">
-          <label class="toggle-label" for="p2-nube1">
-            <span data-i18n="usarNube">☁ Usar nube del mueble</span>
-            <input type="checkbox" id="p2-nube1" onchange="syncNubes(1, this.checked)">
-          </label>
+        <div class="toggle-container-nube" onclick="toggleCardCheckbox('p2-nube1', event)">
+          <span data-i18n="usarNube">☁ Usar nube del mueble</span>
+          <input type="checkbox" id="p2-nube1" onchange="syncNubes(1, this.checked)" onclick="event.stopPropagation()">
         </div>
       </div>
 
@@ -702,17 +697,13 @@
         <div class="metric-row total-cost-row"><span class="metric-label" data-i18n="costoTotalFons">Costo total de Fons</span><span class="metric-value" id="p2-costototal2">0</span></div>
         <div class="metric-row"><span class="metric-label" data-i18n="nubesUsar">Nubes a usar</span><span class="metric-value" id="p2-nubesusadas2">0</span></div>
         
-        <div class="toggle-container">
-          <label class="toggle-label" for="p2-cita2">
-            <span data-i18n="cita">¿Cita?</span>
-            <input type="checkbox" id="p2-cita2" checked onchange="syncCitas(2, this.checked)">
-          </label>
+        <div class="toggle-container" onclick="toggleCardCheckbox('p2-cita2', event)">
+          <span data-i18n="cita">¿Cita?</span>
+          <input type="checkbox" id="p2-cita2" checked onchange="syncCitas(2, this.checked)" onclick="event.stopPropagation()">
         </div>
-        <div class="toggle-container-nube">
-          <label class="toggle-label" for="p2-nube2">
-            <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
-            <input type="checkbox" id="p2-nube2" onchange="syncNubes(2, this.checked)">
-          </label>
+        <div class="toggle-container-nube" onclick="toggleCardCheckbox('p2-nube2', event)">
+          <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
+          <input type="checkbox" id="p2-nube2" onchange="syncNubes(2, this.checked)" onclick="event.stopPropagation()">
         </div>
       </div>
 
@@ -731,17 +722,13 @@
         <div class="metric-row total-cost-row"><span class="metric-label" data-i18n="costoTotalFons">Costo total de Fons</span><span class="metric-value" id="p2-costototal3">0</span></div>
         <div class="metric-row"><span class="metric-label" data-i18n="nubesUsar">Nubes a usar</span><span class="metric-value" id="p2-nubesusadas3">0</span></div>
         
-        <div class="toggle-container">
-          <label class="toggle-label" for="p2-cita3">
-            <span data-i18n="cita">¿Cita?</span>
-            <input type="checkbox" id="p2-cita3" checked onchange="syncCitas(3, this.checked)">
-          </label>
+        <div class="toggle-container" onclick="toggleCardCheckbox('p2-cita3', event)">
+          <span data-i18n="cita">¿Cita?</span>
+          <input type="checkbox" id="p2-cita3" checked onchange="syncCitas(3, this.checked)" onclick="event.stopPropagation()">
         </div>
-        <div class="toggle-container-nube">
-          <label class="toggle-label" for="p2-nube3">
-            <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
-            <input type="checkbox" id="p2-nube3" onchange="syncNubes(3, this.checked)">
-          </label>
+        <div class="toggle-container-nube" onclick="toggleCardCheckbox('p2-nube3', event)">
+          <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
+          <input type="checkbox" id="p2-nube3" onchange="syncNubes(3, this.checked)" onclick="event.stopPropagation()">
         </div>
       </div>
     </div>
@@ -949,6 +936,15 @@
 
     function closeModal() {
       document.getElementById('image-modal').style.display = 'none';
+    }
+
+    function toggleCardCheckbox(checkboxId, event) {
+      event.stopPropagation();
+      const checkbox = document.getElementById(checkboxId);
+      if (checkbox && !checkbox.disabled) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event('change'));
+      }
     }
 
     function onCharacterChangeTab1(name) {
@@ -1164,11 +1160,9 @@
           container.innerHTML = `
             <div class="metric-row"><span class="metric-label">${t.affinityLabel}</span><span class="metric-value">${afiBase} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"></span></div>
             <div class="metric-row"><span class="metric-label">${t.precioUnidad}</span><span class="metric-value">${costUnit.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
-            <div class="toggle-container-nube">
-              <label class="toggle-label" for="p1-nube${idx}">
-                <span>${t.usarNube}</span>
-                <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="syncNubes(${idx}, this.checked)">
-              </label>
+            <div class="toggle-container-nube" onclick="toggleCardCheckbox('p1-nube${idx}', event)">
+              <span>${t.usarNube}</span>
+              <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="syncNubes(${idx}, this.checked)" onclick="event.stopPropagation()">
             </div>
             <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #fecaca; color: #ef4444; padding: 8px; border-radius: 6px; font-size: 11px; text-align: center; margin-top: 8px; font-weight: bold;">
               ${t.sinCitaMsg}
@@ -1224,17 +1218,13 @@
           <div class="metric-row"><span class="metric-label">${t.affinityLabel}</span><span class="metric-value">${afiBase} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"></span></div>
           <div class="metric-row"><span class="metric-label">${t.precioUnidad}</span><span class="metric-value">${costUnit.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
           
-          <div class="toggle-container">
-            <label class="toggle-label" for="p1-cita${idx}">
-              <span>${t.contarCita}</span>
-              <input type="checkbox" id="p1-cita${idx}" ${cuentaCita ? 'checked' : ''} onchange="syncCitas(${idx}, this.checked)">
-            </label>
+          <div class="toggle-container" onclick="toggleCardCheckbox('p1-cita${idx}', event)">
+            <span>${t.contarCita}</span>
+            <input type="checkbox" id="p1-cita${idx}" ${cuentaCita ? 'checked' : ''} onchange="syncCitas(${idx}, this.checked)" onclick="event.stopPropagation()">
           </div>
-          <div class="toggle-container-nube">
-            <label class="toggle-label" for="p1-nube${idx}">
-              <span>${t.usarNube}</span>
-              <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="syncNubes(${idx}, this.checked)">
-            </label>
+          <div class="toggle-container-nube" onclick="toggleCardCheckbox('p1-nube${idx}', event)">
+            <span>${t.usarNube}</span>
+            <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="syncNubes(${idx}, this.checked)" onclick="event.stopPropagation()">
           </div>
 
           <div class="highlight-box">
