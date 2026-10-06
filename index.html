@@ -789,6 +789,11 @@
         const key = el.getAttribute('data-i18n');
         if (t[key]) el.innerText = t[key];
       });
+      // Sincronizar el texto inicial del botón de idioma según el estado actual
+      const langBtn = document.getElementById('lang-btn');
+      if (langBtn) {
+        langBtn.innerText = currentLang === 'es' ? '🇺🇸 EN' : '🇪🇸 ES';
+      }
     }
 
     function initWeb(data) {
