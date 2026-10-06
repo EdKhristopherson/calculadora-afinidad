@@ -282,7 +282,7 @@
       height: 16px;
       vertical-align: middle;
       object-fit: contain;
-      margin-left: 3px;
+      margin-right: 2px;
     }
 
     #image-modal {
@@ -345,7 +345,7 @@
     }
 
     .item-column {
-      position: relative; /* Para posicionar el botón flotante superior derecho */
+      position: relative;
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 16px;
@@ -365,7 +365,6 @@
       margin-bottom: 10px;
     }
 
-    /* Botón compacto superior derecho para añadir al reporte */
     .save-btn-top {
       position: absolute;
       top: 12px;
@@ -478,7 +477,7 @@
       height: 16px;
     }
 
-    /* Sección de Reporte Guardado con Tarjetas Horizontal Estilizadas */
+    /* SECCIÓN DE REPORTE ESTILO TARJETA HORIZONTAL AVANZADA */
     .report-section-title {
       font-size: 18px;
       font-weight: 700;
@@ -505,20 +504,20 @@
       transition: transform 0.2s;
     }
 
-    /* Efecto de desvanecimiento con la ilustración del personaje al fondo a la derecha */
+    /* Desvanecimiento con la ilustración del personaje al fondo */
     .report-card::after {
       content: "";
       position: absolute;
       right: 0;
       top: 0;
-      width: 35%;
+      width: 45%;
       height: 100%;
       background-image: var(--bg-chara-img);
       background-size: cover;
       background-position: center right;
       opacity: 0.18;
-      mask-image: linear-gradient(to right, transparent, black 80%);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 80%);
+      mask-image: linear-gradient(to right, transparent, black 85%);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 85%);
       pointer-events: none;
       z-index: 1;
     }
@@ -536,16 +535,39 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      flex: 1;
     }
 
-    .report-card-img {
+    /* Avatar del personaje con su barrita de progreso debajo */
+    .report-avatar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 80px;
+    }
+
+    .report-avatar-img {
       width: 64px;
       height: 64px;
-      border-radius: 10px;
+      border-radius: 50%;
       object-fit: cover;
+      border: 2px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .report-mini-spark {
+      width: 100%;
+      height: 10px;
       background-color: var(--border-color);
-      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .report-mini-spark-bar {
+      height: 100%;
+      background-color: #f59e0b;
+      width: 0%;
     }
 
     .report-card-info {
@@ -557,7 +579,7 @@
     .report-card-header-line {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .report-card-chara {
@@ -569,7 +591,7 @@
     }
 
     .report-card-bond {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #fbbf24;
       background: rgba(217, 119, 6, 0.15);
@@ -579,27 +601,31 @@
     }
 
     .report-card-itemline {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 700;
       color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
-    .report-card-meta {
+    .report-card-affinity-gain {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ec4899;
+      display: flex;
+      align-items: center;
+    }
+
+    .report-card-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       font-size: 12px;
       color: var(--text-muted);
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
     }
 
     .report-card-right-group {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
     }
 
     .report-card-days {
@@ -608,7 +634,7 @@
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
     .report-card-cost-box {
@@ -988,8 +1014,12 @@
         sinCitaMsg: "Este personaje no cuenta con sistema de citas",
         reporteTitulo: "📋 Reporte de Recursos Guardados",
         limpiarReporte: "Limpiar todo",
-        costoTotalLv10: "TOTAL COST TO LV.10",
-        bondLevelText: "BOND LEVEL"
+        costoTotalLv10: "COSTO TOTAL A LV.10",
+        bondLevelText: "NIVEL DE BOND",
+        giftsAmountText: "Cantidad de regalos:",
+        datesUsedText: "Citas usadas:",
+        cloudsUsedText: "Nubes usadas:",
+        daysRemainingText: "Días faltantes:"
       },
       en: {
         tabPersonajes: "Characters",
@@ -1015,7 +1045,11 @@
         reporteTitulo: "📋 Saved Resources Report",
         limpiarReporte: "Clear all",
         costoTotalLv10: "TOTAL COST TO LV.10",
-        bondLevelText: "BOND LEVEL"
+        bondLevelText: "BOND LEVEL",
+        giftsAmountText: "Gifts amount:",
+        datesUsedText: "Dates used:",
+        cloudsUsedText: "Clouds used:",
+        daysRemainingText: "Days remaining:"
       }
     };
 
@@ -1341,6 +1375,16 @@
       const itemImg = getDirectImageUrl(selectedCharaTab2['itemimg_' + idx]);
       const avatarImg = getDirectImageUrl(selectedCharaTab2.img);
       const nivelSel = document.getElementById('p2-nivel').value;
+      const rawAfiInput = document.getElementById('p2-afiactual').value.replace(/,/g, '');
+      const afiIngresada = Number(rawAfiInput) || 0;
+
+      let afiBaseNivel = 0;
+      for (let i = 0; i <= Number(nivelSel); i++) {
+        afiBaseNivel += REQUISITOS_NIVEL[i];
+      }
+      const afiAcumulada = afiBaseNivel + afiIngresada;
+      const porcentaje = Math.min(100, Math.max(0, (afiAcumulada / AFINIDAD_MAX) * 100));
+
       const cantRegalos = document.getElementById(`p2-cant${idx}`).innerText;
       const diasFaltantes = document.getElementById(`p2-dias${idx}`).innerText;
       const costoTotalFons = document.getElementById(`p2-costototal${idx}`).innerText;
@@ -1353,6 +1397,7 @@
         id: Date.now() + Math.random(),
         chara: selectedCharaTab2.chara,
         nivelSel: nivelSel,
+        porcentaje: porcentaje,
         itemName: itemName,
         itemImg: itemImg,
         avatarImg: avatarImg,
@@ -1403,30 +1448,42 @@
       reporteGuardado.forEach(item => {
         const t = translations[currentLang];
         const bgStyle = item.avatarImg ? `--bg-chara-img: url('${item.avatarImg}');` : '';
+        const pct = item.porcentaje !== undefined ? item.porcentaje : 0;
         
         html += `
           <div class="report-card" style="${bgStyle}">
             <div class="report-card-left">
+              <div class="report-avatar-col">
+                <img src="${item.avatarImg || ''}" class="report-avatar-img" alt="Avatar">
+                <div class="report-mini-spark">
+                  <div class="report-mini-spark-bar" style="width: ${pct}%;"></div>
+                </div>
+              </div>
+              
               <img src="${item.itemImg || ''}" class="report-card-img" alt="Item">
+              
               <div class="report-card-info">
                 <div class="report-card-header-line">
                   <span class="report-card-chara">${item.chara}</span>
-                  <span class="report-card-bond">BOND LEVEL ${item.nivelSel}</span>
+                  <span class="report-card-bond">${t.bondLevelText} ${item.nivelSel}</span>
                 </div>
                 <div class="report-card-itemline">
-                  <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> +${item.afiValor} AFFECTION ${item.itemName}
+                  ${item.itemName}
                 </div>
-                <div class="report-card-meta">
-                  <span>🎁 Gifts amount: <strong>${item.cantRegalos}</strong></span>
-                  ${item.cuentaCita ? `<span>📅 Dates used: <strong>${item.diasFaltantes}</strong></span>` : ''}
-                  ${item.usaNube ? `<span>☁️ Clouds used: <strong>${item.diasFaltantes}</strong></span>` : ''}
+                <div class="report-card-affinity-gain">
+                  <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> +${item.afiValor} AFFECTION
+                </div>
+                <div class="report-card-meta-list">
+                  <span>🎁 ${t.giftsAmountText} <strong>${item.cantRegalos}</strong></span>
+                  ${item.cuentaCita ? `<span>📅 ${t.datesUsedText} <strong>${item.diasFaltantes}</strong></span>` : ''}
+                  ${item.usaNube ? `<span>☁️ ${t.cloudsUsedText} <strong>${item.diasFaltantes}</strong></span>` : ''}
                 </div>
               </div>
             </div>
             
             <div class="report-card-right-group">
               <div class="report-card-days">
-                ⏳ Days remaining: <strong>${item.diasFaltantes}</strong>
+                ⏳ ${t.daysRemainingText} <strong>${item.diasFaltantes}</strong>
               </div>
               <div class="report-card-cost-box">
                 <div class="report-card-cost-label">${t.costoTotalLv10}</div>
