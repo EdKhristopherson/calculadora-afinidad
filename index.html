@@ -279,7 +279,7 @@
 
     .affinity-icon {
       width: 16px;
-      width: 16px;
+      height: 16px;
       vertical-align: middle;
       object-fit: contain;
       margin-left: 3px;
@@ -409,7 +409,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Contenedores Interactivos Modernos (Switches con manejo de JS robusto) */
     .toggle-container {
       background-color: var(--accent-green-bg);
       border: 1px solid var(--accent-green-border);
@@ -444,18 +443,143 @@
       transition: background-color 0.2s;
     }
 
-    .toggle-container input[type="checkbox"] {
-      cursor: pointer;
-      width: 16px;
-      height: 16px;
-      accent-color: #10b981;
-    }
-
+    .toggle-container input[type="checkbox"],
     .toggle-container-nube input[type="checkbox"] {
       cursor: pointer;
       width: 16px;
       height: 16px;
-      accent-color: #8b5cf6;
+    }
+
+    /* Botón de Guardar en Reporte */
+    .save-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+    .save-btn:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-1px);
+    }
+
+    /* Sección de Reporte Horizontal (inspirado en tu imagen) */
+    .report-section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 30px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .report-card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+    .report-card:hover {
+      border-color: rgba(217, 119, 6, 0.8);
+    }
+
+    .report-card-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .report-card-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      object-fit: cover;
+      background-color: var(--border-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .report-card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .report-card-chara {
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .report-card-itemname {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .report-card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .report-card-cost-box {
+      background-color: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(217, 119, 6, 0.5);
+      border-radius: 10px;
+      padding: 10px 20px;
+      text-align: right;
+      min-width: 180px;
+    }
+
+    .report-card-cost-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .report-card-cost-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #d97706;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .delete-report-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .delete-report-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
     }
 
     .details-accordion {
@@ -680,6 +804,8 @@
           <span data-i18n="usarNube">☁ Usar nube del mueble</span>
           <input type="checkbox" id="p2-nube1" onchange="syncNubes(1, this.checked)" onclick="event.stopPropagation()">
         </div>
+
+        <button class="save-btn" onclick="guardarEnReporte(1)" data-i18n="btnGuardar">💾 Añadir al reporte</button>
       </div>
 
       <!-- Tarjeta Ítem 2 (Tab 2) -->
@@ -705,6 +831,8 @@
           <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
           <input type="checkbox" id="p2-nube2" onchange="syncNubes(2, this.checked)" onclick="event.stopPropagation()">
         </div>
+
+        <button class="save-btn" onclick="guardarEnReporte(2)" data-i18n="btnGuardar">💾 Añadir al reporte</button>
       </div>
 
       <!-- Tarjeta Ítem 3 (Tab 2) -->
@@ -730,7 +858,18 @@
           <span data-i18n="usarNube">☁️ Usar nube del mueble</span>
           <input type="checkbox" id="p2-nube3" onchange="syncNubes(3, this.checked)" onclick="event.stopPropagation()">
         </div>
+
+        <button class="save-btn" onclick="guardarEnReporte(3)" data-i18n="btnGuardar">💾 Añadir al reporte</button>
       </div>
+    </div>
+
+    <!-- SECCIÓN DE REPORTE HORIZONTAL -->
+    <div class="report-section-title">
+      <span data-i18n="reporteTitulo">📋 Reporte de Recursos Guardados</span>
+      <button class="top-action-btn" onclick="limpiarReporte()" style="font-size: 12px; padding: 4px 10px;" data-i18n="limpiarReporte">Limpiar todo</button>
+    </div>
+    <div id="reporte-lista-container">
+      <!-- Aquí aparecerán dinámicamente las tarjetas horizontales -->
     </div>
   </div>
 
@@ -744,6 +883,7 @@
     let charactersData = [];
     let selectedCharaTab1 = null;
     let selectedCharaTab2 = null;
+    let reporteGuardado = [];
 
     const FONS_ICON_URL = 'https://lh3.googleusercontent.com/d/1eFSFZPncsRkZU-yORmU10zoxF5zwjt7T';
     const AFFINITY_ICON_URL = 'https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT';
@@ -773,7 +913,11 @@
         cita: "¿Cita?",
         contarCita: "¿Contar cita?",
         usarNube: "☁ Usar nube del mueble",
-        sinCitaMsg: "Este personaje no cuenta con sistema de citas"
+        sinCitaMsg: "Este personaje no cuenta con sistema de citas",
+        btnGuardar: "💾 Añadir al reporte",
+        reporteTitulo: "📋 Reporte de Recursos Guardados",
+        limpiarReporte: "Limpiar todo",
+        costoTotalLv10: "Costo total a lv.10"
       },
       en: {
         tabPersonajes: "Characters",
@@ -795,7 +939,11 @@
         cita: "Date?",
         contarCita: "Count date?",
         usarNube: "Use furniture cloud",
-        sinCitaMsg: "This character does not have a date system"
+        sinCitaMsg: "This character does not have a date system",
+        btnGuardar: "💾 Add to report",
+        reporteTitulo: "📋 Saved Resources Report",
+        limpiarReporte: "Clear all",
+        costoTotalLv10: "Total cost to lv.10"
       }
     };
 
@@ -808,6 +956,13 @@
         document.body.classList.add('dark-mode');
       }
       
+      const savedReport = localStorage.getItem('reporteGuardado');
+      if (savedReport) {
+        try {
+          reporteGuardado = JSON.parse(savedReport);
+        } catch(e) { reporteGuardado = []; }
+      }
+
       const cachedData = localStorage.getItem('charactersData_cache');
       if (cachedData) {
         try {
@@ -842,6 +997,7 @@
       currentLang = currentLang === 'es' ? 'en' : 'es';
       aplicarTraducciones();
       recalculate();
+      renderReporte();
       
       if (selectedCharaTab1) onCharacterChangeTab1(selectedCharaTab1.chara);
       if (selectedCharaTab2) onCharacterChangeTab2(selectedCharaTab2.chara);
@@ -883,6 +1039,7 @@
         onCharacterChangeTab2(data[0].chara);
       }
       aplicarTraducciones();
+      renderReporte();
     }
 
     function switchTab(tabId, btnElement) {
@@ -1102,6 +1259,96 @@
       if (p2Nube) p2Nube.checked = isChecked;
       recalculateTab1();
       recalculateTab2();
+    }
+
+    function guardarEnReporte(idx) {
+      if (!selectedCharaTab2) return;
+
+      const isEn = currentLang === 'en';
+      const itemName = isEn ? (selectedCharaTab2['itemname' + idx + 'en'] || selectedCharaTab2['itemname' + idx]) : selectedCharaTab2['itemname' + idx];
+      const itemImg = getDirectImageUrl(selectedCharaTab2['itemimg_' + idx]);
+      const cantRegalos = document.getElementById(`p2-cant${idx}`).innerText;
+      const diasFaltantes = document.getElementById(`p2-dias${idx}`).innerText;
+      const costoTotalFons = document.getElementById(`p2-costototal${idx}`).innerText;
+      const afiValor = selectedCharaTab2['affinity' + idx];
+
+      const nuevoRegistro = {
+        id: Date.now() + Math.random(),
+        chara: selectedCharaTab2.chara,
+        itemName: itemName,
+        itemImg: itemImg,
+        afiValor: afiValor,
+        cantRegalos: cantRegalos,
+        diasFaltantes: diasFaltantes,
+        costoTotalFons: costoTotalFons
+      };
+
+      reporteGuardado.push(nuevoRegistro);
+      localStorage.setItem('reporteGuardado', JSON.stringify(reporteGuardado));
+      renderReporte();
+
+      // Animación sutil de confirmación
+      const btn = event.target;
+      const originalText = btn.innerText;
+      btn.innerText = "✅ ¡Guardado!";
+      setTimeout(() => { btn.innerText = originalText; }, 1200);
+    }
+
+    function eliminarDelReporte(id) {
+      reporteGuardado = reporteGuardado.filter(item => item.id !== id);
+      localStorage.setItem('reporteGuardado', JSON.stringify(reporteGuardado));
+      renderReporte();
+    }
+
+    function limpiarReporte() {
+      reporteGuardado = [];
+      localStorage.removeItem('reporteGuardado');
+      renderReporte();
+    }
+
+    function renderReporte() {
+      const container = document.getElementById('reporte-lista-container');
+      if (!container) return;
+
+      if (reporteGuardado.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding: 24px; color: var(--text-muted); font-size: 13px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+            ${currentLang === 'en' ? 'No saved items in report yet. Click "Add to report" in any calculation card.' : 'Aún no hay elementos guardados en el reporte. Haz clic en "Añadir al reporte" en cualquier tarjeta de cálculo.'}
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      reporteGuardado.forEach(item => {
+        const t = translations[currentLang];
+        html += `
+          <div class="report-card">
+            <div class="report-card-left">
+              <img src="${item.itemImg || ''}" class="report-card-img" alt="Item">
+              <div class="report-card-info">
+                <span class="report-card-chara">${item.chara} • +${item.afiValor} Afinidad</span>
+                <span class="report-card-itemname">${item.itemName}</span>
+                <div class="report-card-meta">
+                  <span>🎁 ${t.cantRegalos}: <strong>${item.cantRegalos}</strong></span>
+                  <span>⏳ ${t.diasFaltantes}: <strong>${item.diasFaltantes}</strong></span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div class="report-card-cost-box">
+                <div class="report-card-cost-label">${t.costoTotalLv10}</div>
+                <div class="report-card-cost-val">
+                  ${item.costoTotalFons}
+                </div>
+              </div>
+              <button class="delete-report-btn" onclick="eliminarDelReporte(${item.id})" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
     }
 
     function recalculateTab1() {
