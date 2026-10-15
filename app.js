@@ -4,13 +4,15 @@ let charactersData = [];
 let selectedCharaTab1 = null;
 let selectedCharaTab2 = null;
 let selectedCharaSim = null;
-let currentOutfitIndex = 0; // 0: Default, 1: Bond
+let currentOutfitIndex = 0;
 let reporteGuardado = [];
 
 const FONS_ICON_URL = 'https://lh3.googleusercontent.com/d/1eFSFZPncsRkZU-yORmU10zoxF5zwjt7T';
 const AFFINITY_ICON_URL = 'https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT';
 const CARD_WRITE_IMG_URL = 'https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX';
 const MOVIE_TICKET_IMG_URL = 'https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr';
+const SIM_NEW_ITEM_1 = 'https://lh3.googleusercontent.com/d/1dqQm82jdyCUIBGBTSEcaZVMZ4TMOuKPl';
+const SIM_NEW_ITEM_2 = 'https://lh3.googleusercontent.com/d/1kggvA_cInSaqtsSJOLKUZgoGuoplaifp';
 
 const REQUISITOS_NIVEL = [500, 1000, 2000, 3500, 5000, 7000, 9000, 12000, 16000, 0];
 const ACUMULADO_HASTA_NIVEL = [0, 500, 1500, 3500, 7000, 12000, 19000, 28000, 40000, 56000];
@@ -76,12 +78,13 @@ const translations = {
     regalosSinCondicion: "Regalos sin condición",
     cartaEscritaMano: "Carta escrita a mano",
     boletoCineFloe: "Boleto del cine Floe",
-    enviarACalcular: "Enviar datos a \"Calcular Afinidad\"",
+    enviarACalcular: "Enviar datos",
+    resetearSim: "Resetear",
     tablaProgresion: "TABLA DE PROGRESIÓN DE NIVEL",
     afinidadAcumulada: "AFINIDAD ACUMULADA",
     afinidadRequerida: "AFINIDAD REQUERIDA",
-    defaultAttire: "Default Attire",
-    bondAttire: "Bond Attire",
+    defaultAttire: "Atuendo por Defecto",
+    bondAttire: "Traje de Afinidad",
     tabla: "ESTADÍSTICAS",
     aplicarRegalos: "Aplicar regalos al perfil"
   },
@@ -129,10 +132,11 @@ const translations = {
     regalosSinCondicion: "Unconditional Gifts",
     cartaEscritaMano: "Handwritten Letter",
     boletoCineFloe: "Floe Cinema Ticket",
-    enviarACalcular: "Send data to \"Calculate Affection\"",
+    enviarACalcular: "Send data",
+    resetearSim: "Reset",
     tablaProgresion: "LEVEL PROGRESSION TABLE",
     afinidadAcumulada: "ACCUMULATED AFFECTION",
-    afinidadRequerida: "REQUIRED AFFECTION",
+    afinidadRequerida: "ACCUMULATED AFFECTION",
     defaultAttire: "Default Attire",
     bondAttire: "Bond Attire",
     tabla: "STATISTICS",
@@ -226,11 +230,9 @@ function initWeb(data) {
   charactersData = data;
   const sel1 = document.getElementById('select-chara-1');
   const sel2 = document.getElementById('select-chara-2');
-  const selSim = document.getElementById('sim-select-chara');
 
   if (sel1) sel1.innerHTML = '';
   if (sel2) sel2.innerHTML = '';
-  if (selSim) selSim.innerHTML = '';
 
   data.forEach(c => {
     if (sel1) {
@@ -244,15 +246,10 @@ function initWeb(data) {
       opt2.value = c.chara; opt2.text = c.chara;
       sel2.appendChild(opt2);
     }
-
-    if (selSim) {
-      let optSim = document.createElement('option');
-      optSim.value = c.chara; optSim.text = c.chara;
-      selSim.appendChild(optSim);
-    }
   });
 
   renderDotaCarousel(data);
+  renderSimVerticalCarousel(data);
   setupCarouselButtons();
 
   if (data.length > 0) {
@@ -267,7 +264,6 @@ function initWeb(data) {
 function renderDotaCarousel(charactersData) {
   const carousel = document.getElementById('dotaCarousel');
   if (!carousel) return;
-  
   carousel.innerHTML = '';
 
   let wrapper = carousel.closest('.dota-carousel-wrapper');
@@ -291,7 +287,6 @@ function renderDotaCarousel(charactersData) {
     card.className = `dota-card ${index === 0 ? 'active' : ''}`;
     card.dataset.index = index;
     card.dataset.characterName = char.chara;
-    
     card.style.animationDelay = `${index * 0.05}s`;
 
     if (char.color_elemento) {
@@ -300,7 +295,7 @@ function renderDotaCarousel(charactersData) {
       card.style.setProperty('--active-glow-color', resolvedColor);
     }
 
-    const imgUrl = getDirectImageUrl(char.img_default || char.img);
+    const imgUrl = getDirectImageUrl(char.pj_base_full || char.img_default);
     const esperTypeImgUrl = getDirectImageUrl(char.esper_type_img);
 
     const skill1 = getDirectImageUrl(char.skill_icon_1);
@@ -351,6 +346,29 @@ function renderDotaCarousel(charactersData) {
   });
 
   setupCarouselInteractivity(carousel);
+}
+
+function renderSimVerticalCarousel(charactersData) {
+  const container = document.getElementById('sim-vertical-espers');
+  if (!container) return;
+  container.innerHTML = '';
+
+  charactersData.forEach((char, index) => {
+    const avatarCircle = document.createElement('div');
+    avatarCircle.className = `sim-esper-circle ${index === 0 ? 'active' : ''}`;
+    avatarCircle.dataset.chara = char.chara;
+
+    const iconUrl = getDirectImageUrl(char.bond_img_short || char.pj_base_short || char.icon_afi);
+    avatarCircle.innerHTML = `<img src="${iconUrl}" alt="${char.chara}">`;
+
+    avatarCircle.addEventListener('click', () => {
+      container.querySelectorAll('.sim-esper-circle').forEach(el => el.classList.remove('active'));
+      avatarCircle.classList.add('active');
+      simOnCharacterChange(char.chara);
+    });
+
+    container.appendChild(avatarCircle);
+  });
 }
 
 function actualizarDotsActivos(activeIndex) {
@@ -449,7 +467,6 @@ function setupCarouselInteractivity(carousel) {
   let isDown = false;
   let startX;
   let scrollLeft;
-  
   let velocity = 0;
   let lastX = 0;
   let lastTime = Date.now();
@@ -587,18 +604,6 @@ function cambiarPersonajeConFlechaTab2(direccion) {
   onCharacterChangeTab2(sel2.options[nuevoIndex].value);
 }
 
-function simCambiarPersonaje(direccion) {
-  const selSim = document.getElementById('sim-select-chara');
-  if (!selSim || selSim.options.length === 0) return;
-
-  let nuevoIndex = selSim.selectedIndex + direccion;
-  if (nuevoIndex < 0) nuevoIndex = selSim.options.length - 1;
-  else if (nuevoIndex >= selSim.options.length) nuevoIndex = 0;
-
-  selSim.selectedIndex = nuevoIndex;
-  simOnCharacterChange(selSim.options[nuevoIndex].value);
-}
-
 function getDirectImageUrl(url) {
   if (!url) return '';
   if (url.includes('drive.google.com')) {
@@ -641,10 +646,16 @@ function onCharacterChangeTab1(name) {
   const p1OutfitName = document.getElementById('p1-outfit-name');
   
   if (sel1) sel1.value = name;
-  if (p1Bonus) p1Bonus.innerText = selectedCharaTab1.bonus;
-  if (p1OutfitName) p1OutfitName.innerText = selectedCharaTab1.outfit_name || translations[currentLang].outfit;
-  
+
   const isEn = currentLang === 'en';
+  if (p1Bonus) {
+    p1Bonus.innerText = isEn ? (selectedCharaTab1.bonus_en || selectedCharaTab1.bonus) : selectedCharaTab1.bonus;
+  }
+  if (p1OutfitName) {
+    const bondName = isEn ? (selectedCharaTab1.bond_name || translations[currentLang].outfit) : (selectedCharaTab1.bond_name_es || selectedCharaTab1.bond_name || translations[currentLang].outfit);
+    p1OutfitName.innerText = bondName;
+  }
+  
   const item1Name = document.getElementById('p1-item1-name');
   const item2Name = document.getElementById('p1-item2-name');
   const item3Name = document.getElementById('p1-item3-name');
@@ -653,7 +664,7 @@ function onCharacterChangeTab1(name) {
   if (item2Name) item2Name.innerText = isEn ? (selectedCharaTab1.itemname2en || selectedCharaTab1.itemname2) : selectedCharaTab1.itemname2;
   if (item3Name) item3Name.innerText = isEn ? (selectedCharaTab1.itemname3en || selectedCharaTab1.itemname3) : selectedCharaTab1.itemname3;
 
-  const avatarUrl = getDirectImageUrl(selectedCharaTab1.img);
+  const avatarUrl = getDirectImageUrl(selectedCharaTab1.pj_base_short || selectedCharaTab1.img);
   const avatarContainer = document.getElementById('p1-avatar-container');
   if (avatarContainer) {
     if (avatarUrl) {
@@ -663,7 +674,7 @@ function onCharacterChangeTab1(name) {
     }
   }
 
-  const outfitUrl = getDirectImageUrl(selectedCharaTab1.outfit_img);
+  const outfitUrl = getDirectImageUrl(selectedCharaTab1.bond_img_full || selectedCharaTab1.outfit_img);
   const outfitContainer = document.getElementById('p1-outfit-container');
   if (outfitContainer) {
     if (outfitUrl) {
@@ -714,7 +725,7 @@ function onCharacterChangeTab2(name) {
   if (item2Name) item2Name.innerText = isEn ? (selectedCharaTab2.itemname2en || selectedCharaTab2.itemname2) : selectedCharaTab2.itemname2;
   if (item3Name) item3Name.innerText = isEn ? (selectedCharaTab2.itemname3en || selectedCharaTab2.itemname3) : selectedCharaTab2.itemname3;
 
-  const iconAfiUrl = getDirectImageUrl(selectedCharaTab2.icon_afi || selectedCharaTab2.img);
+  const iconAfiUrl = getDirectImageUrl(selectedCharaTab2.bond_img_short || selectedCharaTab2.pj_base_short || selectedCharaTab2.icon_afi);
   const avatarContainer2 = document.getElementById('p2-avatar-container');
   if (avatarContainer2) {
     if (iconAfiUrl) {
@@ -784,72 +795,159 @@ function simOnCharacterChange(name) {
   selectedCharaSim = charactersData.find(c => c.chara === name);
   if (!selectedCharaSim) return;
 
-  const selSim = document.getElementById('sim-select-chara');
-  if (selSim) selSim.value = name;
-
-  const cartasQty = document.getElementById('sim-cartas-qty');
-  const boletosQty = document.getElementById('sim-boletos-qty');
-  if (cartasQty) cartasQty.value = '0';
-  if (boletosQty) boletosQty.value = '0';
-  
-  [1, 2, 3].forEach(idx => {
-    const giftInput = document.getElementById(`sim-gift-qty-${idx}`);
-    if (giftInput) giftInput.value = '0';
-  });
-
   currentOutfitIndex = 0;
+
+  const simCharaName = document.getElementById('sim-chara-name');
+  const simCharaTag = document.getElementById('sim-chara-tag');
+
+  if (simCharaName) simCharaName.innerText = selectedCharaSim.chara;
+
+  const isEn = currentLang === 'en';
+  if (simCharaTag) {
+    const descrip = isEn ? (selectedCharaSim.vinc_descrip_en || selectedCharaSim.vinc_descrip) : selectedCharaSim.vinc_descrip;
+    simCharaTag.innerText = descrip || `Miembro de UAC-2`;
+  }
+
+  const cartasQtyInv = document.getElementById('sim-inv-cartas-qty');
+  const boletosQtyInv = document.getElementById('sim-inv-boletos-qty');
+  if (cartasQtyInv) cartasQtyInv.value = '0';
+  if (boletosQtyInv) boletosQtyInv.value = '0';
+
+  [1, 2, 3, 4, 5].forEach(idx => {
+    const invInput = document.getElementById(`sim-inv-gift-qty-${idx}`);
+    if (invInput) invInput.value = '0';
+  });
 
   simActualizarOutfitVisual();
   simActualizarRegalosPersonaje();
   simRecalcular();
+
+  const vContainer = document.getElementById('sim-vertical-espers');
+  if (vContainer) {
+    vContainer.querySelectorAll('.sim-esper-circle').forEach(circle => {
+      if (circle.dataset.chara === name) circle.classList.add('active');
+      else circle.classList.remove('active');
+    });
+  }
+}
+
+function simObtenerListaOutfitsValidos() {
+  if (!selectedCharaSim) return [];
+  let lista = [];
+
+  // 1. Imagen del PJ Base (Siempre de primera)
+  const baseFull = selectedCharaSim.pj_base_full || selectedCharaSim.img_default || selectedCharaSim.img;
+  if (baseFull && baseFull.toString().trim() !== "") {
+    lista.push({
+      full: baseFull,
+      short: selectedCharaSim.pj_base_short || selectedCharaSim.icon_afi || selectedCharaSim.img,
+      name_en: selectedCharaSim.pj_base_name || "Default Attire",
+      name_es: selectedCharaSim.pj_base_name_es || selectedCharaSim.pj_base_name || "Atuendo por Defecto"
+    });
+  }
+
+  // 2. Traje de Afinidad / Bond (De segunda posición)
+  const bondFull = selectedCharaSim.bond_img_full || selectedCharaSim.outfit_img;
+  if (bondFull && bondFull.toString().trim() !== "") {
+    lista.push({
+      full: bondFull,
+      short: selectedCharaSim.bond_img_short || selectedCharaSim.icon_afi || bondFull,
+      name_en: selectedCharaSim.bond_name || "Bond Attire",
+      name_es: selectedCharaSim.bond_name_es || selectedCharaSim.bond_name || "Traje de Afinidad"
+    });
+  }
+
+  // 3. Outfits adicionales del 1 al 6 (SÓLO celdas con contenido real)
+  for (let i = 1; i <= 6; i++) {
+    const fullImg = selectedCharaSim[`outfit_img_full_${i}`];
+    const shortImg = selectedCharaSim[`outfit_img_short_${i}`];
+    const nameEn = selectedCharaSim[`outfit_name_${i}`];
+    const nameEs = selectedCharaSim[`outfit_name_${i}_es`];
+
+    if (fullImg && fullImg.toString().trim() !== "") {
+      lista.push({
+        full: fullImg,
+        short: shortImg || fullImg,
+        name_en: nameEn || `Outfit ${i}`,
+        name_es: nameEs || nameEn || `Atuendo ${i}`
+      });
+    }
+  }
+
+  return lista;
+}
+
+function cambiarSkinSimulador(direccion) {
+  if (!selectedCharaSim) return;
+  const outfitsDisponibles = simObtenerListaOutfitsValidos();
+  if (outfitsDisponibles.length <= 1) return;
+
+  currentOutfitIndex += direccion;
+  if (currentOutfitIndex < 0) {
+    currentOutfitIndex = outfitsDisponibles.length - 1;
+  } else if (currentOutfitIndex >= outfitsDisponibles.length) {
+    currentOutfitIndex = 0;
+  }
+
+  simActualizarOutfitVisual();
 }
 
 function simActualizarOutfitVisual() {
   if (!selectedCharaSim) return;
 
+  const outfits = simObtenerListaOutfitsValidos();
+  if (outfits.length === 0) return;
+
+  if (currentOutfitIndex >= outfits.length) currentOutfitIndex = 0;
+
+  const skinActual = outfits[currentOutfitIndex];
   const viewer = document.getElementById('sim-outfit-viewer-container');
-  const outfitDisplay = document.getElementById('sim-display-outfit');
 
-  let imgUrl = getDirectImageUrl(selectedCharaSim.img_default || selectedCharaSim.img);
-  let outfitNameText = selectedCharaSim.outfit_name || translations[currentLang].defaultAttire;
-
-  if (outfitDisplay) outfitDisplay.innerText = outfitNameText;
+  const imgUrl = getDirectImageUrl(skinActual.full);
+  const isEn = currentLang === 'en';
+  const nombreSkin = isEn ? skinActual.name_en : skinActual.name_es;
 
   if (viewer) {
-    if (imgUrl) {
-      viewer.innerHTML = `<img src="${imgUrl}" alt="Outfit" onclick="openModal('${imgUrl}')">`;
-    } else {
-      viewer.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">[ No Image ]</span>`;
+    viewer.innerHTML = `
+      <img src="${imgUrl}" alt="${nombreSkin}" style="width: 100%; height: 100%; object-fit: contain; cursor: pointer;" onclick="openModal(this.src)">
+      <button type="button" class="sim-skin-nav-btn sim-skin-prev" onclick="cambiarSkinSimulador(-1)" title="Skin anterior">‹</button>
+      <button type="button" class="sim-skin-nav-btn sim-skin-next" onclick="cambiarSkinSimulador(1)" title="Siguiente skin">›</button>
+      <div class="sim-outfit-name-box" id="sim-outfit-name-label">${nombreSkin}</div>
+    `;
+  }
+
+  // Sincronizar dinámicamente la miniatura corta en el carrusel vertical
+  const vContainer = document.getElementById('sim-vertical-espers');
+  if (vContainer) {
+    const activeCircle = vContainer.querySelector(`.sim-esper-circle[data-chara="${selectedCharaSim.chara}"] img`);
+    if (activeCircle && skinActual.short) {
+      activeCircle.src = getDirectImageUrl(skinActual.short);
     }
   }
 }
 
 function simActualizarRegalosPersonaje() {
   if (!selectedCharaSim) return;
-  const isEn = currentLang === 'en';
 
   [1, 2, 3].forEach(idx => {
-    const nameEl = document.getElementById(`sim-gift-name-${idx}`);
-    const valEl = document.getElementById(`sim-gift-val-${idx}`);
-    const imgEl = document.getElementById(`sim-gift-img-${idx}`);
-
-    if (nameEl) {
-      const itemName = isEn ? (selectedCharaSim[`itemname${idx}en`] || selectedCharaSim[`itemname${idx}`]) : selectedCharaSim[`itemname${idx}`];
-      nameEl.innerText = itemName || `Item ${idx}`;
-    }
-
-    if (valEl) {
-      const afiVal = selectedCharaSim[`affinity${idx}`] || 0;
-      valEl.innerHTML = `+${afiVal} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity">`;
-    }
-
-    if (imgEl) {
-      const itemImgUrl = getDirectImageUrl(selectedCharaSim[`itemimg_${idx}`]);
-      if (itemImgUrl) {
-        imgEl.src = itemImgUrl;
-      }
-    }
+    const itemImgUrl = getDirectImageUrl(selectedCharaSim[`itemimg_${idx}`]);
+    const favImg = document.getElementById(`sim-fav-gift-img-${idx}`);
+    if (favImg && itemImgUrl) favImg.src = itemImgUrl;
   });
+
+  [1, 2, 3].forEach(idx => {
+    const itemImgUrl = getDirectImageUrl(selectedCharaSim[`itemimg_${idx}`]);
+    const afiVal = selectedCharaSim[`affinity${idx}`] || 0;
+
+    const invImg = document.getElementById(`sim-inv-gift-img-${idx}`);
+    const invVal = document.getElementById(`sim-inv-gift-val-${idx}`);
+    if (invImg && itemImgUrl) invImg.src = itemImgUrl;
+    if (invVal) invVal.innerHTML = `${afiVal} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity">`;
+  });
+}
+
+function simResetAll() {
+  simOnCharacterChange(selectedCharaSim ? selectedCharaSim.chara : charactersData[0].chara);
 }
 
 function validarRestriccionCitaTab1() {
@@ -945,8 +1043,8 @@ function onTab2CheckboxChange() {
 function guardarEnReporte(idx, event) {
   if (!selectedCharaTab2) return;
 
-  const bgCharaImg = getDirectImageUrl(selectedCharaTab2.img_default || selectedCharaTab2.img);
-  const avatarImg = getDirectImageUrl(selectedCharaTab2.icon_afi || selectedCharaTab2.img);
+  const bgCharaImg = getDirectImageUrl(selectedCharaTab2.pj_base_full || selectedCharaTab2.img_default);
+  const avatarImg = getDirectImageUrl(selectedCharaTab2.bond_img_short || selectedCharaTab2.pj_base_short || selectedCharaTab2.icon_afi);
 
   const nivelSelElem = document.getElementById('p2-nivel');
   const rawAfiElem = document.getElementById('p2-afiactual');
@@ -1317,42 +1415,28 @@ function calcularNivelYRestante(puntosTotales) {
 function simRecalcular() {
   if (!selectedCharaSim) return;
 
-  const simCartas = document.getElementById('sim-cartas-qty');
-  const simBoletos = document.getElementById('sim-boletos-qty');
-  const simOutNivel = document.getElementById('sim-out-nivel');
-  const simOutAfinidad = document.getElementById('sim-out-afinidad');
-  const sparkbar = document.getElementById('sim-sparkline-bar');
-  const simProgressText = document.getElementById('sim-progress-text');
+  const invCartas = Number(document.getElementById('sim-inv-cartas-qty')?.value) || 0;
+  const invBoletos = Number(document.getElementById('sim-inv-boletos-qty')?.value) || 0;
 
-  const qtyCartas = simCartas ? Number(simCartas.value) || 0 : 0;
-  const qtyBoletos = simBoletos ? Number(simBoletos.value) || 0 : 0;
-  let afiExtraRegalos = (qtyCartas * 2000) + (qtyBoletos * 400);
+  let afiExtraRegalos = (invCartas * 2000) + (invBoletos * 400);
 
-  [1, 2, 3].forEach(idx => {
-    const giftInput = document.getElementById(`sim-gift-qty-${idx}`);
-    if (giftInput) {
-      const cant = Number(giftInput.value) || 0;
-      const afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
-      afiExtraRegalos += (cant * afiUnit);
-    }
+  [1, 2, 3, 4, 5].forEach(idx => {
+    const invCant = Number(document.getElementById(`sim-inv-gift-qty-${idx}`)?.value) || 0;
+    let afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
+    if (idx === 4 || idx === 5) afiUnit = 400;
+    afiExtraRegalos += (invCant * afiUnit);
   });
 
   let afiAcumulada = afiExtraRegalos;
   if (afiAcumulada > AFINIDAD_MAX) afiAcumulada = AFINIDAD_MAX;
 
   const res = calcularNivelYRestante(afiAcumulada);
-  if (simOutNivel) simOutNivel.innerText = res.nivel;
-  
-  if (simOutAfinidad) simOutAfinidad.innerHTML = res.sobra.toLocaleString('en-US') + ' <img src="' + AFFINITY_ICON_URL + '" class="affinity-icon" alt="Affinity">';
 
-  const porcentaje = Math.min(100, Math.max(0, (afiAcumulada / AFINIDAD_MAX) * 100));
-  if (sparkbar) {
-    sparkbar.style.width = porcentaje + '%';
-    sparkbar.style.backgroundColor = porcentaje < 30 ? '#ef4444' : (porcentaje < 70 ? '#f59e0b' : '#10b981');
-  }
-  if (simProgressText) {
-    simProgressText.innerText = `${afiAcumulada.toLocaleString('en-US')} / ${AFINIDAD_MAX.toLocaleString('en-US')}`;
-  }
+  const levelBadge = document.getElementById('sim-level-badge');
+  const expSub = document.getElementById('sim-exp-sub');
+
+  if (levelBadge) levelBadge.innerText = res.nivel;
+  if (expSub) expSub.innerText = res.sobra.toLocaleString('en-US');
 
   simRenderTablaProgresion(res.nivel);
 }
@@ -1381,19 +1465,16 @@ function simRenderTablaProgresion(nivelActualSim = 1) {
 function simEnviarDatos() {
   if (!selectedCharaSim) return;
 
-  const simCartas = document.getElementById('sim-cartas-qty');
-  const simBoletos = document.getElementById('sim-boletos-qty');
-  const qtyCartas = simCartas ? Number(simCartas.value) || 0 : 0;
-  const qtyBoletos = simBoletos ? Number(simBoletos.value) || 0 : 0;
-  let afiExtraRegalos = (qtyCartas * 2000) + (qtyBoletos * 400);
+  const invCartas = Number(document.getElementById('sim-inv-cartas-qty')?.value) || 0;
+  const invBoletos = Number(document.getElementById('sim-inv-boletos-qty')?.value) || 0;
 
-  [1, 2, 3].forEach(idx => {
-    const giftInput = document.getElementById(`sim-gift-qty-${idx}`);
-    if (giftInput) {
-      const cant = Number(giftInput.value) || 0;
-      const afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
-      afiExtraRegalos += (cant * afiUnit);
-    }
+  let afiExtraRegalos = (invCartas * 2000) + (invBoletos * 400);
+
+  [1, 2, 3, 4, 5].forEach(idx => {
+    const invCant = Number(document.getElementById(`sim-inv-gift-qty-${idx}`)?.value) || 0;
+    let afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
+    if (idx === 4 || idx === 5) afiUnit = 400;
+    afiExtraRegalos += (invCant * afiUnit);
   });
 
   let afiAcumulada = afiExtraRegalos;
@@ -1543,22 +1624,5 @@ function recalculateTab2() {
 function recalculate() {
   recalculateTab1();
   recalculateTab2();
-  simRecalcular();
-}
-
-// Funciones de reinicio independiente para los nuevos botones en el Simulador
-function resetSimUnconditional() {
-  const cartas = document.getElementById('sim-cartas-qty');
-  const boletos = document.getElementById('sim-boletos-qty');
-  if (cartas) cartas.value = '0';
-  if (boletos) boletos.value = '0';
-  simRecalcular();
-}
-
-function resetSimNormalGifts() {
-  [1, 2, 3].forEach(idx => {
-    const input = document.getElementById(`sim-gift-qty-${idx}`);
-    if (input) input.value = '0';
-  });
   simRecalcular();
 }

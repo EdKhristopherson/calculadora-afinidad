@@ -154,8 +154,6 @@
         </div>
 
         <div class="calc-layout-master">
-          
-          <!-- COLUMNA IZQUIERDA: Perfil y Controles -->
           <div class="calc-sidebar-panel">
             <div class="profile-card" style="width: 100%; border: none; box-shadow: none; padding: 0; background: transparent;">
               <div class="avatar-container" id="p2-avatar-container">
@@ -232,7 +230,6 @@
             </div>
           </div>
 
-          <!-- COLUMNA DERECHA: Ítems + Reporte -->
           <div class="calc-main-panel">
             <div class="calc-items-grid">
               
@@ -310,7 +307,6 @@
 
             </div>
 
-            <!-- Sección de Reporte Integrada abajo -->
             <div class="calc-report-wrapper">
               <div class="report-section-title">
                 <span data-i18n="reporteTitulo">Reporte de Recursos Guardados</span>
@@ -337,122 +333,131 @@
           <hr class="header-divider">
         </div>
 
-        <div class="sim-layout-container">
-          <div class="sim-left-panel">
-            <div class="sim-outfit-viewer" id="sim-outfit-viewer-container">
-              <span style="font-size:12px; color:var(--text-muted);">[ Outfit Viewer ]</span>
-            </div>
-            <div class="sim-outfit-controls">
-              <button type="button" class="nav-arrow-btn" onclick="simCambiarPersonaje(-1)">&lt;</button>
-              <div class="sim-character-title-box">
-                <div class="sim-select-wrapper">
-                  <select id="sim-select-chara" class="sim-chara-select-clean" onchange="simOnCharacterChange(this.value)"></select>
-                </div>
-                <span class="sim-outfit-name-sub" id="sim-display-outfit">Default Attire</span>
-              </div>
-              <button type="button" class="nav-arrow-btn" onclick="simCambiarPersonaje(1)">&gt;</button>
+        <div class="sim-grid-layout">
+          
+          <!-- BLOQUE 1: PERSONAJE -->
+          <div class="sim-block-character">
+            <div class="sim-outfit-viewer" id="sim-outfit-viewer-container" style="position: relative;">
+              <!-- Imagen principal del outfit -->
+              <img id="sim-outfit-img" src="" alt="Outfit" style="width: 100%; height: 100%; object-fit: contain; cursor: pointer;" onclick="openModal(this.src)">
+              
+              <!-- Botones flotantes de navegación con Loop -->
+              <button type="button" class="sim-skin-nav-btn sim-skin-prev" onclick="cambiarSkinSimulador(-1)" title="Skin anterior">‹</button>
+              <button type="button" class="sim-skin-nav-btn sim-skin-next" onclick="cambiarSkinSimulador(1)" title="Siguiente skin">›</button>
+
+              <!-- Cajita translúcida inferior para el nombre del outfit -->
+              <div class="sim-outfit-name-box" id="sim-outfit-name-label">Outfit</div>
             </div>
           </div>
 
-          <div class="sim-center-panel">
-            <div class="sim-table-header-title" data-i18n="tabla">ESTADÍSTICAS</div>
+          <!-- BLOQUE 2: PANEL CENTRAL -->
+          <div class="sim-block-main">
             
-            <div class="sim-metrics-grid">
-              <div class="sim-metric-card">
-                <span class="sim-metric-label" data-i18n="nivel">NIVEL</span>
-                <span class="sim-metric-val" id="sim-out-nivel">0</span>
+            <!-- CAJA 1: CABECERA -->
+            <div class="sim-inner-box sim-box-header">
+              <div class="sim-chara-info-box">
+                <h2 id="sim-chara-name" class="sim-chara-title">Fadia</h2>
+                <span id="sim-chara-tag" class="sim-chara-sub">Miembro de UAC-2</span>
               </div>
-              <div class="sim-metric-card">
-                <span class="sim-metric-label" data-i18n="affinityLabel">AFINIDAD</span>
-                <span class="sim-metric-val" id="sim-out-afinidad">0 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
-              </div>
-            </div>
-
-            <div class="sim-progress-box">
-              <div class="sparkline-container">
-                <div id="sim-sparkline-bar" class="sparkline-bar"></div>
-                <div id="sim-progress-text" class="sparkline-text">0 / 56,100</div>
+              <div class="sim-level-circle-container">
+                <span class="sim-level-label">Afinidad</span>
+                <div class="sim-level-circle" id="sim-level-badge">1</div>
+                <span class="sim-exp-sub" id="sim-exp-sub">0</span>
               </div>
             </div>
 
-            <div class="sim-gifts-box">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <div class="section-title" style="margin: 0; text-align: left;" data-i18n="regalosSinCondicion">REGALOS SIN CONDICIÓN</div>
-                <button class="delete-report-btn" onclick="resetSimUnconditional()" title="Limpiar regalos sin condición" style="width: 22px; height: 22px; font-size: 12px;">
-                  ↺
-                </button>
-              </div>
+            <!-- CAJA CONTENEDORA GRIS INTERMEDIA -->
+            <div class="sim-inner-box sim-box-mid-container">
               
-              <div class="sim-gift-card-lg" onclick="openModal(CARD_WRITE_IMG_URL)">
-                <img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta">
-                <div class="sim-gift-info">
-                  <span class="sim-gift-name" data-i18n="cartaEscritaMano">Carta escrita a mano</span>
-                  <span class="sim-gift-val">+2,000 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
-                </div>
-                <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
-                  <input type="number" id="sim-cartas-qty" value="0" min="0" oninput="simRecalcular()">
+              <!-- CONTENEDOR 1: FAVORITOS -->
+              <div class="sim-sub-box">
+                <div class="sim-pink-bar">FAVORITOS</div>
+                <div class="sim-fav-slots-row">
+                  <div class="sim-slot-display"><img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta"></div>
+                  <div class="sim-slot-display"><img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto"></div>
+                  <div class="sim-slot-display"><img id="sim-fav-gift-img-1" src="" alt="Fav 1"></div>
+                  <div class="sim-slot-display"><img id="sim-fav-gift-img-2" src="" alt="Fav 2"></div>
+                  <div class="sim-slot-display"><img id="sim-fav-gift-img-3" src="" alt="Fav 3"></div>
                 </div>
               </div>
 
-              <div class="sim-gift-card-lg" onclick="openModal(MOVIE_TICKET_IMG_URL)">
-                <img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto">
-                <div class="sim-gift-info">
-                  <span class="sim-gift-name" data-i18n="boletoCineFloe">Boleto del cine Floe</span>
-                  <span class="sim-gift-val">+400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
+              <!-- CONTENEDOR 2: INVENTARIO -->
+              <div class="sim-sub-box">
+                <div class="sim-pink-bar" style="background-color: #3b82f6;">INVENTARIO / REGALOS FALTANTES</div>
+                <div class="sim-inv-grid">
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta">
+                      <input type="number" id="sim-inv-cartas-qty" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer">2000 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto">
+                      <input type="number" id="sim-inv-boletos-qty" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img id="sim-inv-gift-img-1" src="" alt="Gift 1">
+                      <input type="number" id="sim-inv-gift-qty-1" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-1">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img id="sim-inv-gift-img-2" src="" alt="Gift 2">
+                      <input type="number" id="sim-inv-gift-qty-2" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-2">200 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card active-selection">
+                    <div class="sim-card-img-wrap">
+                      <img id="sim-inv-gift-img-3" src="" alt="Gift 3">
+                      <input type="number" id="sim-inv-gift-qty-3" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-3">100 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img id="sim-inv-gift-img-4" src="https://lh3.googleusercontent.com/d/1dqQm82jdyCUIBGBTSEcaZVMZ4TMOuKPl" alt="Nuevo 1">
+                      <input type="number" id="sim-inv-gift-qty-4" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
+
+                  <div class="sim-slot-card">
+                    <div class="sim-card-img-wrap">
+                      <img id="sim-inv-gift-img-5" src="https://lh3.googleusercontent.com/d/1kggvA_cInSaqtsSJOLKUZgoGuoplaifp" alt="Nuevo 2">
+                      <input type="number" id="sim-inv-gift-qty-5" value="0" min="0" oninput="simRecalcular()">
+                    </div>
+                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                  </div>
                 </div>
-                <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
-                  <input type="number" id="sim-boletos-qty" value="0" min="0" oninput="simRecalcular()">
-                </div>
+              </div>
+
+            </div>
+
+            <!-- CAJA 4: FOOTER / ACCIONES -->
+            <div class="sim-inner-box sim-box-footer">
+              <div class="sim-bond-logo">BOND</div>
+              <div class="sim-footer-buttons">
+                <button type="button" class="sim-btn-reset" onclick="simResetAll()" data-i18n="resetearSim">Resetear</button>
+                <button type="button" class="sim-btn-submit" onclick="simEnviarDatos()" data-i18n="enviarACalcular">Enviar datos</button>
               </div>
             </div>
 
-            <!-- REGALOS ESPECÍFICOS DEL PERSONAJE -->
-            <div class="sim-gifts-box" style="margin-top: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <div class="section-title" style="margin: 0; text-align: left;">REGALOS</div>
-                <button class="delete-report-btn" onclick="resetSimNormalGifts()" title="Limpiar regalos normales" style="width: 22px; height: 22px; font-size: 12px;">
-                  ↺
-                </button>
-              </div>
-              
-              <div class="sim-gift-card-lg" onclick="openModal(document.getElementById('sim-gift-img-1').src)">
-                <img id="sim-gift-img-1" src="" alt="Item 1">
-                <div class="sim-gift-info">
-                  <span class="sim-gift-name" id="sim-gift-name-1">Item 1</span>
-                  <span class="sim-gift-val" id="sim-gift-val-1">+400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
-                </div>
-                <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
-                  <input type="number" id="sim-gift-qty-1" value="0" min="0" oninput="simRecalcular()">
-                </div>
-              </div>
-
-              <div class="sim-gift-card-lg" onclick="openModal(document.getElementById('sim-gift-img-2').src)">
-                <img id="sim-gift-img-2" src="" alt="Item 2">
-                <div class="sim-gift-info">
-                  <span class="sim-gift-name" id="sim-gift-name-2">Item 2</span>
-                  <span class="sim-gift-val" id="sim-gift-val-2">+200 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
-                </div>
-                <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
-                  <input type="number" id="sim-gift-qty-2" value="0" min="0" oninput="simRecalcular()">
-                </div>
-              </div>
-
-              <div class="sim-gift-card-lg" onclick="openModal(document.getElementById('sim-gift-img-3').src)">
-                <img id="sim-gift-img-3" src="" alt="Item 3">
-                <div class="sim-gift-info">
-                  <span class="sim-gift-name" id="sim-gift-name-3">Item 3</span>
-                  <span class="sim-gift-val" id="sim-gift-val-3">+100 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
-                </div>
-                <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
-                  <input type="number" id="sim-gift-qty-3" value="0" min="0" oninput="simRecalcular()">
-                </div>
-              </div>
-            </div>
-
-            <button class="sim-transfer-btn" onclick="simEnviarDatos()" data-i18n="enviarACalcular">Enviar datos a "Calcular Afinidad"</button>
           </div>
 
-          <div class="sim-right-panel">
+          <!-- BLOQUE 3: TABLA DE PROGRESIÓN -->
+          <div class="sim-block-table">
             <div class="sim-table-header-title" data-i18n="tablaProgresion">TABLA DE PROGRESIÓN DE NIVEL</div>
             <div class="sim-table-wrapper">
               <table class="sim-progress-table">
@@ -467,6 +472,10 @@
               </table>
             </div>
           </div>
+
+          <!-- BLOQUE 4: CARRUSEL VERTICAL -->
+          <div class="sim-block-carousel-vertical" id="sim-vertical-espers"></div>
+
         </div>
       </div>
 
@@ -474,7 +483,7 @@
   </div>
 
   <div class="footer">
-    Calculadora de Afinidad v1.2.0 • Desarrollo en beta 
+    Calculadora de Afinidad v1.3.0 • Desarrollo en beta 
   </div>
 
   <script src="app.js"></script>
