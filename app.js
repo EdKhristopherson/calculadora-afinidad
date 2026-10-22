@@ -1,11 +1,21 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4o42FhIcR4mcGG1chHjHDjBu0IMTqyeCsUMrC-XHM_tdfp_QyfzQuZ1p-su4qMjksAA/exec';
 
+const ZERO_SKILL_NAME = "Habilidad Urbana";
+
 let charactersData = [];
 let selectedCharaTab1 = null;
 let selectedCharaTab2 = null;
 let selectedCharaSim = null;
-let currentOutfitIndex = 0;
 let reporteGuardado = [];
+let lastUserSelectedLevelTab2 = 1;
+
+let characterSkinState = {};
+
+let zeroSkillState = {
+  1: 0,
+  2: 0,
+  3: 0
+};
 
 const FONS_ICON_URL = 'https://lh3.googleusercontent.com/d/1eFSFZPncsRkZU-yORmU10zoxF5zwjt7T';
 const AFFINITY_ICON_URL = 'https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT';
@@ -14,7 +24,8 @@ const MOVIE_TICKET_IMG_URL = 'https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZ
 const SIM_NEW_ITEM_1 = 'https://lh3.googleusercontent.com/d/1dqQm82jdyCUIBGBTSEcaZVMZ4TMOuKPl';
 const SIM_NEW_ITEM_2 = 'https://lh3.googleusercontent.com/d/1kggvA_cInSaqtsSJOLKUZgoGuoplaifp';
 
-const REQUISITOS_NIVEL = [500, 1000, 2000, 3500, 5000, 7000, 9000, 12000, 16000, 0];
+const EXP_PARA_SUBIR = [500, 1000, 2000, 3500, 5000, 7000, 9000, 12000, 16000];
+const REQUISITOS_NIVEL = [100, 500, 1000, 2000, 3500, 5000, 7000, 9000, 12000, 16000];
 const ACUMULADO_HASTA_NIVEL = [0, 500, 1500, 3500, 7000, 12000, 19000, 28000, 40000, 56000];
 const AFINIDAD_MAX = 56000;
 
@@ -37,7 +48,7 @@ const translations = {
   es: {
     tabInicio: "Inicio",
     tabPersonajes: "General",
-    tabCalcular: "Calcular Afinidad",
+    tabCalcular: "Affinity Calculator",
     tabSimulador: "Simulador",
     headerPersonajesTitle: "GENERAL",
     headerPersonajesDesc: "Consulta la lista de personajes, sus bonos de afinidad desbloqueables y los requisitos de nivel para planificar tus recursos.",
@@ -86,19 +97,26 @@ const translations = {
     defaultAttire: "Atuendo por Defecto",
     bondAttire: "Traje de Afinidad",
     tabla: "ESTADÍSTICAS",
-    aplicarRegalos: "Aplicar regalos al perfil"
+    aplicarRegalos: "Aplicar regalos al perfil",
+    urbanSkill: "Habilidad Urbana",
+    favoritosTitle: "Favoritos",
+    inventarioTitle: "Inventario",
+    affectionLabelText: "Afinidad",
+    affinityLabelUpper: "AFINIDAD",
+    levelLabelShort: "NIVEL",
+    affinityLabelShort: "AFINIDAD"
   },
   en: {
     tabInicio: "Home",
     tabPersonajes: "General",
-    tabCalcular: "Calculate Affection",
+    tabCalcular: "Affinity Calculator",
     tabSimulador: "Simulator",
     headerPersonajesTitle: "GENERAL",
     headerPersonajesDesc: "Browse character details, unlockable affection bonuses, and level requirements to plan your resources.",
-    headerCalcularTitle: "CALCULATE AFFECTION",
+    headerCalcularTitle: "CALCULATE AFFINITY",
     headerCalcularDesc: "Calculate estimated days and total Fons cost based on selected gifts, dates, and Fluffy Cottons.",
     headerSimuladorTitle: "SIMULATOR",
-    headerSimuladorDesc: "Simulate level progression, adjust gift amounts, and transfer calculation data directly.",
+    headerSimuladorDesc: "Simulate level progression, adjust gift amounts, and send data directly to the calculator.",
     seleccionarEsper: "Select Esper",
     subtituloInicio: "Use mouse wheel or drag to explore",
     bonoAfinidad: "Level 10 Affection Bonus",
@@ -130,7 +148,7 @@ const translations = {
     cloudsUsedText: "Fluffy Cotton req.:",
     daysRemainingText: "Days to go:",
     regalosSinCondicion: "Unconditional Gifts",
-    cartaEscritaMano: "Handwritten Letter",
+    cartaEscritaMano: "A Handwritten Letter",
     boletoCineFloe: "Floe Cinema Ticket",
     enviarACalcular: "Send data",
     resetearSim: "Reset",
@@ -140,7 +158,14 @@ const translations = {
     defaultAttire: "Default Attire",
     bondAttire: "Bond Attire",
     tabla: "STATISTICS",
-    aplicarRegalos: "Apply gifts to profile"
+    aplicarRegalos: "Apply gifts to profile",
+    urbanSkill: "Life Skills",
+    favoritosTitle: "Favorites",
+    inventarioTitle: "Inventory",
+    affectionLabelText: "Affection",
+    affinityLabelUpper: "AFFECTION",
+    levelLabelShort: "LEVEL",
+    affinityLabelShort: "AFFECTION"
   }
 };
 
@@ -203,13 +228,34 @@ function toggleTheme() {
 function toggleLanguage() {
   currentLang = currentLang === 'es' ? 'en' : 'es';
   aplicarTraducciones();
+
+  const isEn = currentLang === 'en';
+
+  if (selectedCharaTab1) {
+    onCharacterChangeTab1(selectedCharaTab1.chara);
+  }
+
+  if (selectedCharaTab2) {
+    onCharacterChangeTab2(selectedCharaTab2.chara);
+  }
+
+  if (selectedCharaSim) {
+    const simCharaTagContainer = document.getElementById('sim-chara-tag-container');
+    if (simCharaTagContainer) {
+      const descrip = isEn ? (selectedCharaSim.vinc_descrip_en || selectedCharaSim.vinc_descrip) : selectedCharaSim.vinc_descrip;
+      const textoEtiqueta = descrip || `Miembro de UAC-2`;
+      simCharaTagContainer.innerHTML = `
+        <svg class="sim-location-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="fill: #94a3b8; flex-shrink: 0; display: inline-block; vertical-align: middle;">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        <span>${textoEtiqueta}</span>
+      `;
+    }
+    simActualizarOutfitVisual();
+  }
+
   recalculate();
   renderReporte();
-  simRenderTablaProgresion();
-  
-  if (selectedCharaTab1) onCharacterChangeTab1(selectedCharaTab1.chara);
-  if (selectedCharaTab2) onCharacterChangeTab2(selectedCharaTab2.chara);
-  if (selectedCharaSim) simOnCharacterChange(selectedCharaSim.chara);
 }
 
 function aplicarTraducciones() {
@@ -224,6 +270,11 @@ function aplicarTraducciones() {
     const globeSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
     langBtn.innerHTML = `${globeSVG} <span>${currentLang === 'es' ? 'ES' : 'EN'}</span>`;
   }
+
+  [1, 2, 3].forEach(tabNum => {
+    const labelBtn = document.querySelector(`#zero-skill-tab${tabNum} .zero-label-btn`);
+    if (labelBtn) labelBtn.innerText = t.urbanSkill;
+  });
 }
 
 function initWeb(data) {
@@ -251,6 +302,7 @@ function initWeb(data) {
   renderDotaCarousel(data);
   renderSimVerticalCarousel(data);
   setupCarouselButtons();
+  renderZeroSkillComponents();
 
   if (data.length > 0) {
     onCharacterChangeTab1(data[0].chara);
@@ -259,6 +311,76 @@ function initWeb(data) {
   }
   aplicarTraducciones();
   renderReporte();
+}
+
+function renderZeroSkillComponents() {
+  [1, 2, 3].forEach(tabNum => {
+    updateZeroSkillUI(tabNum);
+  });
+}
+
+function setZeroSkillLevel(tabNum, level) {
+  if (zeroSkillState[tabNum] === level) {
+    zeroSkillState[tabNum] = 0;
+  } else {
+    zeroSkillState[tabNum] = level;
+  }
+  updateZeroSkillUI(tabNum);
+  
+  if (tabNum === 1) recalculateTab1();
+  if (tabNum === 2) recalculateTab2();
+  if (tabNum === 3) simRecalcular();
+}
+
+function toggleZeroSkillTab(tabNum) {
+  if (zeroSkillState[tabNum] > 0) {
+    zeroSkillState[tabNum] = 0;
+  } else {
+    zeroSkillState[tabNum] = 1;
+  }
+  updateZeroSkillUI(tabNum);
+
+  if (tabNum === 1) recalculateTab1();
+  if (tabNum === 2) recalculateTab2();
+  if (tabNum === 3) simRecalcular();
+}
+
+function updateZeroSkillUI(tabNum) {
+  const container = document.getElementById(`zero-skill-tab${tabNum}`);
+  if (!container) return;
+
+  const currentLvl = zeroSkillState[tabNum];
+  const labelBtn = container.querySelector('.zero-label-btn');
+  const numBtns = container.querySelectorAll('.zero-num-btn');
+
+  if (currentLvl > 0) {
+    container.classList.add('active-skill');
+    if (labelBtn) labelBtn.classList.add('active');
+  } else {
+    container.classList.remove('active-skill');
+    if (labelBtn) labelBtn.classList.remove('active');
+  }
+
+  numBtns.forEach((btn, idx) => {
+    const btnLvl = idx + 1;
+    if (btnLvl === currentLvl) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function getZeroBuffValue(zeroLevel, bondLevel, baseValue) {
+  if (zeroLevel <= 0 || bondLevel <= 0) return baseValue;
+
+  const maxBondThresholds = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 8 };
+  const maxAllowedBond = maxBondThresholds[zeroLevel] || 0;
+
+  if (bondLevel <= maxAllowedBond) {
+    return Math.round(baseValue * 1.05);
+  }
+  return baseValue;
 }
 
 function renderDotaCarousel(charactersData) {
@@ -750,6 +872,14 @@ function onCharacterChangeTab2(name) {
   onNivelChangeTab2();
 }
 
+function resetPerfilTab2() {
+  const nivelSelect = document.getElementById('p2-nivel');
+  const afiActualInput = document.getElementById('p2-afiactual');
+  if (nivelSelect) nivelSelect.value = '1';
+  if (afiActualInput) afiActualInput.value = '0';
+  recalculateTab2();
+}
+
 function reiniciarRegalosTab2() {
   const cartasInput = document.getElementById('p2-cartas-qty');
   const boletosInput = document.getElementById('p2-boletos-qty');
@@ -774,7 +904,12 @@ function aplicarRegalosTab2() {
 
   const cartasQty = Number(cartasInput.value) || 0;
   const boletosQty = Number(boletosInput.value) || 0;
-  const afiExtraRegalos = (cartasQty * 2000) + (boletosQty * 400);
+
+  const zeroLvlTab2 = zeroSkillState[2];
+  const valorCartaBuff = getZeroBuffValue(zeroLvlTab2, nivelSel, 2000);
+  const valorBoletoBuff = getZeroBuffValue(zeroLvlTab2, nivelSel, 400);
+
+  const afiExtraRegalos = (cartasQty * valorCartaBuff) + (boletosQty * valorBoletoBuff);
 
   const afiBaseNivel = ACUMULADO_HASTA_NIVEL[nivelSel - 1] || 0;
   let afiAcumuladaTotal = afiBaseNivel + afiIngresada + afiExtraRegalos;
@@ -795,18 +930,32 @@ function simOnCharacterChange(name) {
   selectedCharaSim = charactersData.find(c => c.chara === name);
   if (!selectedCharaSim) return;
 
-  currentOutfitIndex = 0;
+  if (characterSkinState[name] === undefined) {
+    characterSkinState[name] = 0;
+  }
 
   const simCharaName = document.getElementById('sim-chara-name');
-  const simCharaTag = document.getElementById('sim-chara-tag');
+  const simCharaTagContainer = document.getElementById('sim-chara-tag-container');
 
   if (simCharaName) simCharaName.innerText = selectedCharaSim.chara;
 
   const isEn = currentLang === 'en';
-  if (simCharaTag) {
+  if (simCharaTagContainer) {
     const descrip = isEn ? (selectedCharaSim.vinc_descrip_en || selectedCharaSim.vinc_descrip) : selectedCharaSim.vinc_descrip;
-    simCharaTag.innerText = descrip || `Miembro de UAC-2`;
+    const textoEtiqueta = descrip || `Miembro de UAC-2`;
+    
+    simCharaTagContainer.innerHTML = `
+      <svg class="sim-location-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="fill: #94a3b8; flex-shrink: 0; display: inline-block; vertical-align: middle;">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+      <span>${textoEtiqueta}</span>
+    `;
   }
+
+  const simInitLevel = document.getElementById('sim-init-level');
+  const simInitAffinity = document.getElementById('sim-init-affinity');
+  if (simInitLevel) simInitLevel.value = '1';
+  if (simInitAffinity) simInitAffinity.value = '0';
 
   const cartasQtyInv = document.getElementById('sim-inv-cartas-qty');
   const boletosQtyInv = document.getElementById('sim-inv-boletos-qty');
@@ -835,7 +984,6 @@ function simObtenerListaOutfitsValidos() {
   if (!selectedCharaSim) return [];
   let lista = [];
 
-  // 1. Imagen del PJ Base (Siempre de primera)
   const baseFull = selectedCharaSim.pj_base_full || selectedCharaSim.img_default || selectedCharaSim.img;
   if (baseFull && baseFull.toString().trim() !== "") {
     lista.push({
@@ -846,7 +994,6 @@ function simObtenerListaOutfitsValidos() {
     });
   }
 
-  // 2. Traje de Afinidad / Bond (De segunda posición)
   const bondFull = selectedCharaSim.bond_img_full || selectedCharaSim.outfit_img;
   if (bondFull && bondFull.toString().trim() !== "") {
     lista.push({
@@ -857,7 +1004,6 @@ function simObtenerListaOutfitsValidos() {
     });
   }
 
-  // 3. Outfits adicionales del 1 al 6 (SÓLO celdas con contenido real)
   for (let i = 1; i <= 6; i++) {
     const fullImg = selectedCharaSim[`outfit_img_full_${i}`];
     const shortImg = selectedCharaSim[`outfit_img_short_${i}`];
@@ -882,13 +1028,17 @@ function cambiarSkinSimulador(direccion) {
   const outfitsDisponibles = simObtenerListaOutfitsValidos();
   if (outfitsDisponibles.length <= 1) return;
 
-  currentOutfitIndex += direccion;
-  if (currentOutfitIndex < 0) {
-    currentOutfitIndex = outfitsDisponibles.length - 1;
-  } else if (currentOutfitIndex >= outfitsDisponibles.length) {
-    currentOutfitIndex = 0;
+  const charName = selectedCharaSim.chara;
+  let activeIndex = characterSkinState[charName] || 0;
+
+  activeIndex += direccion;
+  if (activeIndex < 0) {
+    activeIndex = outfitsDisponibles.length - 1;
+  } else if (activeIndex >= outfitsDisponibles.length) {
+    activeIndex = 0;
   }
 
+  characterSkinState[charName] = activeIndex;
   simActualizarOutfitVisual();
 }
 
@@ -898,9 +1048,15 @@ function simActualizarOutfitVisual() {
   const outfits = simObtenerListaOutfitsValidos();
   if (outfits.length === 0) return;
 
-  if (currentOutfitIndex >= outfits.length) currentOutfitIndex = 0;
+  const charName = selectedCharaSim.chara;
+  let activeIndex = characterSkinState[charName] || 0;
 
-  const skinActual = outfits[currentOutfitIndex];
+  if (activeIndex >= outfits.length) {
+    activeIndex = 0;
+    characterSkinState[charName] = 0;
+  }
+
+  const skinActual = outfits[activeIndex];
   const viewer = document.getElementById('sim-outfit-viewer-container');
 
   const imgUrl = getDirectImageUrl(skinActual.full);
@@ -916,7 +1072,6 @@ function simActualizarOutfitVisual() {
     `;
   }
 
-  // Sincronizar dinámicamente la miniatura corta en el carrusel vertical
   const vContainer = document.getElementById('sim-vertical-espers');
   if (vContainer) {
     const activeCircle = vContainer.querySelector(`.sim-esper-circle[data-chara="${selectedCharaSim.chara}"] img`);
@@ -937,17 +1092,41 @@ function simActualizarRegalosPersonaje() {
 
   [1, 2, 3].forEach(idx => {
     const itemImgUrl = getDirectImageUrl(selectedCharaSim[`itemimg_${idx}`]);
-    const afiVal = selectedCharaSim[`affinity${idx}`] || 0;
 
     const invImg = document.getElementById(`sim-inv-gift-img-${idx}`);
-    const invVal = document.getElementById(`sim-inv-gift-val-${idx}`);
     if (invImg && itemImgUrl) invImg.src = itemImgUrl;
-    if (invVal) invVal.innerHTML = `${afiVal} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity">`;
   });
 }
 
 function simResetAll() {
+  const initLevelElem = document.getElementById('sim-init-level');
+  const initAfiElem = document.getElementById('sim-init-affinity');
+  if (initLevelElem) initLevelElem.value = '1';
+  if (initAfiElem) initAfiElem.value = '0';
+
   simOnCharacterChange(selectedCharaSim ? selectedCharaSim.chara : charactersData[0].chara);
+}
+
+function formatAndValidateSimAffinity(input) {
+  if (!input) return;
+  let rawValue = input.value.replace(/[^0-9]/g, '');
+  if (rawValue === '') {
+    input.value = '0';
+    simRecalcular();
+    return;
+  }
+  let num = parseInt(rawValue, 10);
+  const nivelSelect = document.getElementById('sim-init-level');
+  const nivel = nivelSelect ? Number(nivelSelect.value) || 1 : 1;
+  
+  const reqSubir = nivel < 10 ? EXP_PARA_SUBIR[nivel - 1] : 0;
+  const maxPermitido = reqSubir > 0 ? reqSubir - 1 : 0;
+
+  if (num > maxPermitido && maxPermitido >= 0) {
+    num = maxPermitido;
+  }
+  input.value = num.toLocaleString('en-US');
+  simRecalcular();
 }
 
 function validarRestriccionCitaTab1() {
@@ -999,8 +1178,13 @@ function onNivelChangeTab2() {
   if (!nivelSelect || !rawAfiInput) return;
 
   const nivel = Number(nivelSelect.value) || 1;
-  const reqNivel = REQUISITOS_NIVEL[nivel - 1] || 0;
-  const maxPermitido = reqNivel > 0 ? reqNivel - 1 : 0;
+  
+  if (nivel < 10) {
+    lastUserSelectedLevelTab2 = nivel;
+  }
+
+  const reqSubir = nivel < 10 ? EXP_PARA_SUBIR[nivel - 1] : 0;
+  const maxPermitido = reqSubir > 0 ? reqSubir - 1 : 0;
   
   let actualVal = Number(rawAfiInput.value.replace(/,/g, '')) || 0;
   if (actualVal > maxPermitido && maxPermitido >= 0) {
@@ -1022,8 +1206,9 @@ function formatAndValidateAffinity(input) {
   let num = parseInt(rawValue, 10);
   const nivelSelect = document.getElementById('p2-nivel');
   const nivel = nivelSelect ? Number(nivelSelect.value) || 1 : 1;
-  const reqNivel = REQUISITOS_NIVEL[nivel - 1] || 0;
-  const maxPermitido = reqNivel > 0 ? reqNivel - 1 : 0;
+  
+  const reqSubir = nivel < 10 ? EXP_PARA_SUBIR[nivel - 1] : 0;
+  const maxPermitido = reqSubir > 0 ? reqSubir - 1 : 0;
 
   if (num > maxPermitido && maxPermitido >= 0) {
     num = maxPermitido;
@@ -1056,7 +1241,11 @@ function guardarEnReporte(idx, event) {
   const afiIngresada = Number(rawAfiInput) || 0;
   const cartasQty = cartasElem ? Number(cartasElem.value) || 0 : 0;
   const boletosQty = boletosElem ? Number(boletosElem.value) || 0 : 0;
-  const afiExtraRegalos = (cartasQty * 2000) + (boletosQty * 400);
+
+  const zeroLvlTab2 = zeroSkillState[2];
+  const valorCartaBuff = getZeroBuffValue(zeroLvlTab2, Number(nivelSel), 2000);
+  const valorBoletoBuff = getZeroBuffValue(zeroLvlTab2, Number(nivelSel), 400);
+  const afiExtraRegalos = (cartasQty * valorCartaBuff) + (boletosQty * valorBoletoBuff);
 
   const afiBaseNivel = ACUMULADO_HASTA_NIVEL[Number(nivelSel) - 1] || 0;
   let afiAcumulada = afiBaseNivel + afiIngresada + afiExtraRegalos;
@@ -1073,7 +1262,10 @@ function guardarEnReporte(idx, event) {
   const cantRegalos = cantRegalosElem ? cantRegalosElem.innerText : '0';
   const diasFaltantes = diasFaltantesElem ? diasFaltantesElem.innerText : '0';
   const costoTotalFons = costoTotalFonsElem ? costoTotalFonsElem.innerText : '0';
-  const afiValor = selectedCharaTab2['affinity' + idx];
+  
+  const baseAfiUnit = Number(selectedCharaTab2['affinity' + idx]) || 0;
+  const afiValor = getZeroBuffValue(zeroLvlTab2, Number(nivelSel), baseAfiUnit);
+
   const usaNube = nubeElem ? nubeElem.checked : false;
   const cuentaCita = citaCheck ? citaCheck.checked : false;
 
@@ -1219,7 +1411,7 @@ function renderReporte() {
           <div class="report-item-details">
             <div class="report-card-itemline">${itemName}</div>
             <div class="report-card-affinity-gain">
-              <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> +${item.afiValor} AFFECTION
+              <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> +${item.afiValor} ${t.affectionLabelText}
             </div>
           </div>
         </div>
@@ -1266,105 +1458,127 @@ function recalculateTab1() {
     }
   }
 
-  let afnTramo1 = 0;
-  if (tieneCita && umbralCita >= 1 && umbralCita <= 10) {
-    afnTramo1 = ACUMULADO_HASTA_NIVEL[umbralCita - 1] || 0;
-  }
-
-  let afnTramo2 = Math.max(0, AFINIDAD_MAX - afnTramo1);
+  const zeroLvlTab1 = zeroSkillState[1];
+  const maxBondZeroThresholds = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 8 };
+  const maxBondZeroLevel = zeroLvlTab1 > 0 ? maxBondZeroThresholds[zeroLvlTab1] : 0;
+  const afnZeroBufeada = maxBondZeroLevel > 0 ? (ACUMULADO_HASTA_NIVEL[maxBondZeroLevel] || 0) : 0;
 
   [1, 2, 3].forEach(idx => {
-    const detailsEl = document.getElementById(`p1-details-${idx}`);
-    const isDetailsOpen = detailsEl ? detailsEl.open : false;
-
-    const afiBase = selectedCharaTab1['affinity' + idx];
-    const costUnit = selectedCharaTab1['itemcost_' + idx];
+    const baseAfi = selectedCharaTab1['affinity' + idx] || 0;
+    const costUnit = selectedCharaTab1['itemcost_' + idx] || 0;
     
     const container = document.getElementById(`p1-tables-container-${idx}`);
     if (!container) return;
 
     const usaNube = document.getElementById('p1-nube' + idx) ? document.getElementById('p1-nube' + idx).checked : false;
-    const t = translations[currentLang];
-
-    if (!tieneCita) {
-      const afiRegalosDia = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
-      const diasReq = afiRegalosDia > 0 ? Math.ceil(AFINIDAD_MAX / afiRegalosDia) : 0;
-      const afiNubesTotal = usaNube ? (diasReq * 400) : 0;
-      const afiFaltanteRegalos = Math.max(0, AFINIDAD_MAX - afiNubesTotal);
-      const cantRegalos = afiBase > 0 ? Math.ceil(afiFaltanteRegalos / afiBase) : 0;
-      const costoTotal = cantRegalos * costUnit;
-      const nubesTotalesUsadas = usaNube ? diasReq : 0;
-
-      container.innerHTML = `
-        <div class="metric-row"><span class="metric-label">${t.affinityLabel}</span><span class="metric-value">${afiBase} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"></span></div>
-        <div class="metric-row"><span class="metric-label">${t.precioUnidad}</span><span class="metric-value">${costUnit.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
-        
-        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #fecaca; color: #ef4444; padding: 8px; border-radius: 6px; font-size: 11px; text-align: center; margin-bottom: 8px; font-weight: bold;">
-          ${t.sinCitaMsg}
-        </div>
-
-        <div class="toggle-container-nube" onclick="toggleCardCheckbox('p1-nube${idx}', event)">
-          <span>${t.usarNube}</span>
-          <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="onTab1CheckboxChange()" onclick="event.stopPropagation()">
-        </div>
-
-        <div class="highlight-box">
-          <div class="metric-row"><span class="metric-label">${t.diasFaltantes}</span><span class="metric-value">${diasReq}</span></div>
-          ${usaNube ? `<div class="metric-row"><span class="metric-label">${t.nubesUsar}</span><span class="metric-value">${nubesTotalesUsadas}</span></div>` : ''}
-          <div class="metric-row"><span class="metric-label">${t.cantRegalos}</span><span class="metric-value">${cantRegalos}</span></div>
-          <div class="metric-row total-cost-row"><span class="metric-label">${t.costoTotalFons}</span><span class="metric-value">${costoTotal.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
-        </div>
-      `;
-      return;
-    }
-
     const checkboxCita = document.getElementById(`p1-cita${idx}`);
-    const cuentaCita = checkboxCita && checkboxCita.checked && !checkboxCita.disabled;
+    const cuentaCita = checkboxCita ? (checkboxCita.checked && !checkboxCita.disabled) : false;
+
+    const t = translations[currentLang];
+    const afiDisplay = getZeroBuffValue(zeroLvlTab1, 1, baseAfi);
 
     let diasReq = 0;
     let cantRegalos = 0;
-    let costoTotal = 0;
 
-    if (!cuentaCita) {
-      const afiRegalosDia = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
-      diasReq = afiRegalosDia > 0 ? Math.ceil(AFINIDAD_MAX / afiRegalosDia) : 0;
-      const afiNubesTotal = usaNube ? (diasReq * 400) : 0;
-      const afiFaltanteRegalos = Math.max(0, AFINIDAD_MAX - afiNubesTotal);
-      cantRegalos = afiBase > 0 ? Math.ceil(afiFaltanteRegalos / afiBase) : 0;
-      costoTotal = cantRegalos * costUnit;
-    } else {
-      const afiRegalosDiaT1 = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
-      const diasTramo1 = afiRegalosDiaT1 > 0 ? Math.ceil(afnTramo1 / afiRegalosDiaT1) : 0;
+    if (!tieneCita || !cuentaCita) {
+      const regalosPorDia = usaNube ? 2 : 3;
+      const valorNubeBase = 400;
+      const afiBufeada = Math.round(baseAfi * 1.05);
+      const valorNubeBufeada = 420;
 
-      const afiRegalosDiaT2 = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
-      const afiCitaDia = 200;
-      const afiTotalDiaT2 = afiRegalosDiaT2 + afiCitaDia;
-      
-      let diasTramo2 = 0;
-      if (afnTramo2 > 0) {
-        diasTramo2 = afiTotalDiaT2 > 0 ? Math.ceil(afnTramo2 / afiTotalDiaT2) : 0;
+      let afiActualSim = 0;
+      let diasSim = 0;
+      let regalosSim = 0;
+
+      while (afiActualSim < AFINIDAD_MAX && diasSim < 1000) {
+        diasSim++;
+        
+        const estaEnBuff = zeroLvlTab1 > 0 && afnZeroBufeada > 0 && afiActualSim < afnZeroBufeada;
+        const currentAfiRegalo = estaEnBuff ? afiBufeada : baseAfi;
+        const currentNubeVal = usaNube ? (estaEnBuff ? valorNubeBufeada : valorNubeBase) : 0;
+        
+        for (let r = 0; r < regalosPorDia; r++) {
+          if (afiActualSim < AFINIDAD_MAX) {
+            afiActualSim += currentAfiRegalo;
+            regalosSim++;
+          }
+        }
+        
+        if (usaNube && afiActualSim < AFINIDAD_MAX) {
+          afiActualSim += currentNubeVal;
+        }
       }
 
-      diasReq = diasTramo1 + diasTramo2;
+      diasReq = diasSim;
+      cantRegalos = regalosSim;
+    }
+    else {
+      let afnTramo1Cita = (umbralCita >= 1 && umbralCita <= 10) ? (ACUMULADO_HASTA_NIVEL[umbralCita - 1] || 0) : 0;
+      
+      let afiBaseT1 = getZeroBuffValue(zeroLvlTab1, Math.min(10, Math.max(1, umbralCita - 1)), baseAfi);
+      let valorNubeT1 = (zeroLvlTab1 > 0 && umbralCita <= (maxBondZeroLevel + 1)) ? 420 : 400;
+      let afiRegalosDiaT1 = usaNube ? (afiBaseT1 * 2 + valorNubeT1) : (afiBaseT1 * 3);
+      
+      let diasT1 = afiRegalosDiaT1 > 0 ? Math.ceil(afnTramo1Cita / afiRegalosDiaT1) : 0;
+      let afiAcumuladaFinT1 = diasT1 * afiRegalosDiaT1;
 
-      let afiNubesTotal = usaNube ? (diasReq * 400) : 0;
-      let afiCitasTotal = diasTramo2 * 200;
-      let afiFaltanteRegalos = Math.max(0, AFINIDAD_MAX - afiNubesTotal - afiCitasTotal);
-      cantRegalos = afiBase > 0 ? Math.ceil(afiFaltanteRegalos / afiBase) : 0;
-      costoTotal = cantRegalos * costUnit;
+      let afnFaltanteTramo2 = Math.max(0, AFINIDAD_MAX - afiAcumuladaFinT1);
+      let afiBaseT2 = getZeroBuffValue(zeroLvlTab1, 10, baseAfi);
+      let valorNubeT2 = 400;
+      let afiRegalosDiaT2 = usaNube ? (afiBaseT2 * 2 + valorNubeT2) : (afiBaseT2 * 3);
+      let afiCitaDia = 200;
+      let afiTotalDiaT2 = afiRegalosDiaT2 + afiCitaDia;
+
+      let diasT2 = 0;
+      if (afnFaltanteTramo2 > 0) {
+        diasT2 = afiTotalDiaT2 > 0 ? Math.ceil(afnFaltanteTramo2 / afiTotalDiaT2) : 0;
+      }
+
+      diasReq = diasT1 + diasT2;
+
+      let afiTotalGeneradaSinRegalos = (usaNube ? diasReq * 400 : 0) + (diasT2 * 200);
+      let afiNecesitadaEnRegalos = Math.max(0, AFINIDAD_MAX - afiTotalGeneradaSinRegalos);
+
+      if (zeroLvlTab1 > 0 && afnZeroBufeada > 0) {
+        let afiBufeadaUnit = Math.round(baseAfi * 1.05);
+        let afiTargetBuff = Math.min(afiNecesitadaEnRegalos, afnZeroBufeada);
+        let regalosT1Buff = afiBufeadaUnit > 0 ? Math.ceil(afiTargetBuff / afiBufeadaUnit) : 0;
+        let afiCubiertaT1 = regalosT1Buff * afiBufeadaUnit;
+
+        let afiRestanteNorm = Math.max(0, afiNecesitadaEnRegalos - afiCubiertaT1);
+        let regalosT2Norm = baseAfi > 0 ? Math.ceil(afiRestanteNorm / baseAfi) : 0;
+
+        cantRegalos = regalosT1Buff + regalosT2Norm;
+      } else {
+        cantRegalos = baseAfi > 0 ? Math.ceil(afiNecesitadaEnRegalos / baseAfi) : 0;
+      }
     }
 
+    const costoTotal = cantRegalos * costUnit;
     const nubesTotalesUsadas = usaNube ? diasReq : 0;
-    const verDetallesTexto = currentLang === 'en' ? 'View tier details' : 'Ver detalles por tramos';
+
+    let citaHtml = '';
+    if (tieneCita) {
+      citaHtml = `
+        <div class="toggle-container" onclick="toggleCardCheckbox('p1-cita${idx}', event)">
+          <span>${t.contarCita}</span>
+          <input type="checkbox" id="p1-cita${idx}" ${cuentaCita ? 'checked' : ''} onchange="onTab1CheckboxChange()" onclick="event.stopPropagation()">
+        </div>
+      `;
+    } else {
+      citaHtml = `
+        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #fecaca; color: #ef4444; padding: 8px; border-radius: 6px; font-size: 11px; text-align: center; margin-bottom: 8px; font-weight: bold;">
+          ${t.sinCitaMsg}
+        </div>
+      `;
+    }
 
     container.innerHTML = `
-      <div class="metric-row"><span class="metric-label">${t.affinityLabel}</span><span class="metric-value">${afiBase} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"></span></div>
+      <div class="metric-row"><span class="metric-label">${t.affinityLabel}</span><span class="metric-value"><img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"> ${afiDisplay}</span></div>
       <div class="metric-row"><span class="metric-label">${t.precioUnidad}</span><span class="metric-value">${costUnit.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
       
-      <div class="toggle-container" onclick="toggleCardCheckbox('p1-cita${idx}', event)">
-        <span>${t.contarCita}</span>
-        <input type="checkbox" id="p1-cita${idx}" ${cuentaCita ? 'checked' : ''} onchange="onTab1CheckboxChange()" onclick="event.stopPropagation()">
-      </div>
+      ${citaHtml}
+
       <div class="toggle-container-nube" onclick="toggleCardCheckbox('p1-nube${idx}', event)">
         <span>${t.usarNube}</span>
         <input type="checkbox" id="p1-nube${idx}" ${usaNube ? 'checked' : ''} onchange="onTab1CheckboxChange()" onclick="event.stopPropagation()">
@@ -1376,108 +1590,198 @@ function recalculateTab1() {
         <div class="metric-row"><span class="metric-label">${t.cantRegalos}</span><span class="metric-value">${cantRegalos}</span></div>
         <div class="metric-row total-cost-row"><span class="metric-label">${t.costoTotalFons}</span><span class="metric-value">${costoTotal.toLocaleString('en-US')} <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons"></span></div>
       </div>
-
-      <details class="details-accordion" id="p1-details-${idx}" ${isDetailsOpen ? 'open' : ''}>
-        <summary>${verDetallesTexto}</summary>
-        <div class="accordion-content">
-          <table class="excel-table">
-            <tr><th colspan="2">${currentLang === 'en' ? 'Affection details level 1 to ' + umbralCita : 'Detalles de afinidad nivel 1 a ' + umbralCita}</th></tr>
-            <tr><td>${currentLang === 'en' ? 'Affection required:' : 'Afinidad necesaria:'}</td><td style="text-align:right;">${afnTramo1.toLocaleString('en-US')}</td></tr>
-            <tr><td>${currentLang === 'en' ? 'Fluffy Cotton?' : '¿Regalo por nube?'}</td><td style="text-align:right;">${usaNube ? 1 : 0}</td></tr>
-          </table>
-
-          <table class="excel-table" style="margin-top: 6px;">
-            <tr><th colspan="2">${currentLang === 'en' ? 'Affection details level ' + umbralCita + ' to 10' : 'Detalles de afinidad nivel ' + umbralCita + ' al 10'}</th></tr>
-            <tr><td>${currentLang === 'en' ? 'Fluffy Cotton?' : '¿Regalo por nube?'}</td><td style="text-align:right;">${usaNube ? 1 : 0}</td></tr>
-          </table>
-        </div>
-      </details>
     `;
   });
 }
 
 function calcularNivelYRestante(puntosTotales) {
-  if (puntosTotales <= 0) return { nivel: 1, sobra: 0 };
-  if (puntosTotales >= AFINIDAD_MAX) return { nivel: 10, sobra: 0 };
+  let nivelActual = 1;
+  let expRestante = puntosTotales;
 
-  let nivelEncontrado = 1;
-  for (let i = 0; i < ACUMULADO_HASTA_NIVEL.length - 1; i++) {
-    if (puntosTotales >= ACUMULADO_HASTA_NIVEL[i] && puntosTotales < ACUMULADO_HASTA_NIVEL[i+1]) {
-      nivelEncontrado = i + 1;
-      break;
-    }
+  while (nivelActual < 10 && expRestante >= EXP_PARA_SUBIR[nivelActual - 1]) {
+    expRestante -= EXP_PARA_SUBIR[nivelActual - 1];
+    nivelActual++;
   }
-  const baseNivelActual = ACUMULADO_HASTA_NIVEL[nivelEncontrado - 1] || 0;
-  const sobra = puntosTotales - baseNivelActual;
-  return { nivel: nivelEncontrado, sobra: sobra };
+
+  const reqSiguiente = nivelActual < 10 ? EXP_PARA_SUBIR[nivelActual - 1] : 0;
+
+  return {
+    nivel: nivelActual,
+    sobra: expRestante,
+    reqNivel: reqSiguiente
+  };
 }
 
 function simRecalcular() {
   if (!selectedCharaSim) return;
 
-  const invCartas = Number(document.getElementById('sim-inv-cartas-qty')?.value) || 0;
-  const invBoletos = Number(document.getElementById('sim-inv-boletos-qty')?.value) || 0;
+  const zeroLvlSim = zeroSkillState[3];
+  const maxBondZeroThresholds = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 8 };
+  const maxBondZeroLevel = zeroLvlSim > 0 ? (maxBondZeroThresholds[zeroLvlSim] || 0) : 0;
+  const afnZeroMeta = maxBondZeroLevel > 0 ? (ACUMULADO_HASTA_NIVEL[maxBondZeroLevel] || 0) : 0;
 
-  let afiExtraRegalos = (invCartas * 2000) + (invBoletos * 400);
+  const initLevelElem = document.getElementById('sim-init-level');
+  const initAfiElem = document.getElementById('sim-init-affinity');
 
-  [1, 2, 3, 4, 5].forEach(idx => {
-    const invCant = Number(document.getElementById(`sim-inv-gift-qty-${idx}`)?.value) || 0;
-    let afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
-    if (idx === 4 || idx === 5) afiUnit = 400;
-    afiExtraRegalos += (invCant * afiUnit);
+  const initLevel = initLevelElem ? Number(initLevelElem.value) || 1 : 1;
+  const rawInitAfi = initAfiElem ? initAfiElem.value.replace(/,/g, '') : '0';
+  const initAfi = Number(rawInitAfi) || 0;
+
+  const afiBaseNivel = ACUMULADO_HASTA_NIVEL[initLevel - 1] || 0;
+  let afiAcumulada = afiBaseNivel + initAfi;
+
+  function getUnitVal(baseUnit) {
+    return (zeroLvlSim > 0 && afnZeroMeta > 0 && afiAcumulada < afnZeroMeta) ? Math.round(baseUnit * 1.05) : baseUnit;
+  }
+
+  const inputCartas = document.getElementById('sim-inv-cartas-qty');
+  const inputBoletos = document.getElementById('sim-inv-boletos-qty');
+  const inputsRegalos = [
+    { input: inputCartas, base: 2000, valElem: document.getElementById('sim-inv-cartas-val') },
+    { input: inputBoletos, base: 400, valElem: document.getElementById('sim-inv-boletos-val') }
+  ];
+
+  [1, 2, 3].forEach(idx => {
+    inputsRegalos.push({
+      input: document.getElementById(`sim-inv-gift-qty-${idx}`),
+      base: Number(selectedCharaSim[`affinity${idx}`]) || 0,
+      valElem: document.getElementById(`sim-inv-gift-val-${idx}`)
+    });
   });
 
-  let afiAcumulada = afiExtraRegalos;
+  [4, 5].forEach(idx => {
+    inputsRegalos.push({
+      input: document.getElementById(`sim-inv-gift-qty-${idx}`),
+      base: 400,
+      valElem: document.getElementById(`sim-inv-gift-val-${idx}`)
+    });
+  });
+
+  inputsRegalos.forEach(item => {
+    if (!item.input) return;
+    let cantDeseada = Number(item.input.value) || 0;
+    if (cantDeseada <= 0) {
+      if (item.valElem) {
+        const unitVal = getUnitVal(item.base);
+        item.valElem.innerHTML = `<img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> ${unitVal}`;
+      }
+      return;
+    }
+
+    let cantUsada = 0;
+    for (let r = 0; r < cantDeseada; r++) {
+      if (afiAcumulada >= AFINIDAD_MAX) break;
+      const unitVal = getUnitVal(item.base);
+      if (afiAcumulada + unitVal > AFINIDAD_MAX) {
+        if (afiAcumulada < AFINIDAD_MAX) {
+          afiAcumulada = AFINIDAD_MAX;
+          cantUsada++;
+        }
+        break;
+      }
+      afiAcumulada += unitVal;
+      cantUsada++;
+    }
+
+    if (cantUsada !== cantDeseada) {
+      item.input.value = cantUsada;
+    }
+
+    if (item.valElem) {
+      const unitVal = getUnitVal(item.base);
+      item.valElem.innerHTML = `<img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Affinity"> ${unitVal}`;
+    }
+  });
+
   if (afiAcumulada > AFINIDAD_MAX) afiAcumulada = AFINIDAD_MAX;
 
   const res = calcularNivelYRestante(afiAcumulada);
 
   const levelBadge = document.getElementById('sim-level-badge');
   const expSub = document.getElementById('sim-exp-sub');
+  const circleFill = document.getElementById('sim-circle-fill');
 
   if (levelBadge) levelBadge.innerText = res.nivel;
-  if (expSub) expSub.innerText = res.sobra.toLocaleString('en-US');
 
-  simRenderTablaProgresion(res.nivel);
-}
-
-function simRenderTablaProgresion(nivelActualSim = 1) {
-  const tbody = document.getElementById('sim-table-body');
-  if (!tbody) return;
-
-  let html = '';
-  for (let i = 1; i <= 10; i++) {
-    const acumu = ACUMULADO_HASTA_NIVEL[i - 1] || 0;
-    const req = REQUISITOS_NIVEL[i - 1] || 0;
-    const isActive = (i === nivelActualSim) ? 'active-sim-level' : '';
-
-    html += `
-      <tr class="${isActive}">
-        <td>${i}</td>
-        <td>${acumu.toLocaleString('en-US')}</td>
-        <td>${req.toLocaleString('en-US')}</td>
-      </tr>
-    `;
+  if (expSub) {
+    if (res.nivel >= 10) {
+      expSub.innerText = res.sobra > 0 ? `+${res.sobra.toLocaleString('en-US')} (MAX)` : `0 (MAX)`;
+    } else {
+      expSub.innerText = `${res.sobra.toLocaleString('en-US')} / ${res.reqNivel.toLocaleString('en-US')}`;
+    }
   }
-  tbody.innerHTML = html;
+
+  let pctNivel = 0;
+  if (res.nivel >= 10) {
+    pctNivel = 1;
+  } else {
+    pctNivel = Math.min(1, Math.max(0, res.sobra / res.reqNivel));
+  }
+
+  const circumference = 175.9;
+  const offset = circumference - (pctNivel * circumference);
+
+  if (circleFill) {
+    circleFill.style.strokeDashoffset = offset;
+
+    if (res.nivel >= 1 && res.nivel <= 3) {
+      circleFill.style.stroke = '#06b6d4'; 
+    } else if (res.nivel >= 4 && res.nivel <= 5) {
+      circleFill.style.stroke = '#22c55e'; 
+    } else if (res.nivel >= 6 && res.nivel <= 9) {
+      circleFill.style.stroke = '#eab308'; 
+    } else if (res.nivel >= 10) {
+      circleFill.style.stroke = '#f97316'; 
+    }
+  }
 }
 
 function simEnviarDatos() {
   if (!selectedCharaSim) return;
 
+  const zeroLvlSim = zeroSkillState[3];
+  const maxBondZeroThresholds = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 8 };
+  const maxBondZeroLevel = zeroLvlSim > 0 ? (maxBondZeroThresholds[zeroLvlSim] || 0) : 0;
+  const afnZeroMeta = maxBondZeroLevel > 0 ? (ACUMULADO_HASTA_NIVEL[maxBondZeroLevel] || 0) : 0;
+
+  const initLevelElem = document.getElementById('sim-init-level');
+  const initAfiElem = document.getElementById('sim-init-affinity');
+  const initLevel = initLevelElem ? Number(initLevelElem.value) || 1 : 1;
+  const rawInitAfi = initAfiElem ? initAfiElem.value.replace(/,/g, '') : '0';
+  const initAfi = Number(rawInitAfi) || 0;
+
+  const afiBaseNivel = ACUMULADO_HASTA_NIVEL[initLevel - 1] || 0;
+  let afiAcumulada = afiBaseNivel + initAfi;
+
+  function sumarConBuffSim(cantidad, baseUnit) {
+    if (cantidad <= 0) return;
+    const bufeadaUnit = Math.round(baseUnit * 1.05);
+    for (let r = 0; r < cantidad; r++) {
+      if (zeroLvlSim > 0 && afnZeroMeta > 0 && afiAcumulada < afnZeroMeta) {
+        afiAcumulada += bufeadaUnit;
+      } else {
+        afiAcumulada += baseUnit;
+      }
+    }
+  }
+
   const invCartas = Number(document.getElementById('sim-inv-cartas-qty')?.value) || 0;
+  sumarConBuffSim(invCartas, 2000);
+
   const invBoletos = Number(document.getElementById('sim-inv-boletos-qty')?.value) || 0;
+  sumarConBuffSim(invBoletos, 400);
 
-  let afiExtraRegalos = (invCartas * 2000) + (invBoletos * 400);
-
-  [1, 2, 3, 4, 5].forEach(idx => {
+  [1, 2, 3].forEach(idx => {
     const invCant = Number(document.getElementById(`sim-inv-gift-qty-${idx}`)?.value) || 0;
-    let afiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
-    if (idx === 4 || idx === 5) afiUnit = 400;
-    afiExtraRegalos += (invCant * afiUnit);
+    const baseAfiUnit = Number(selectedCharaSim[`affinity${idx}`]) || 0;
+    sumarConBuffSim(invCant, baseAfiUnit);
   });
 
-  let afiAcumulada = afiExtraRegalos;
+  [4, 5].forEach(idx => {
+    const invCant = Number(document.getElementById(`sim-inv-gift-qty-${idx}`)?.value) || 0;
+    sumarConBuffSim(invCant, 400);
+  });
+
   if (afiAcumulada > AFINIDAD_MAX) afiAcumulada = AFINIDAD_MAX;
 
   const res = calcularNivelYRestante(afiAcumulada);
@@ -1506,19 +1810,102 @@ function recalculateTab2() {
   const afiActualInput = document.getElementById('p2-afiactual');
   if (!nivelSelect || !afiActualInput) return;
 
-  const nivelSel = Number(nivelSelect.value) || 1;
+  let nivelSel = Number(nivelSelect.value) || 1;
+  if (nivelSel < 10) {
+    lastUserSelectedLevelTab2 = nivelSel;
+  } else {
+    nivelSel = lastUserSelectedLevelTab2;
+  }
+
   const rawAfiInput = afiActualInput.value.replace(/,/g, '');
   const afiIngresada = Number(rawAfiInput) || 0;
 
   const cartasQtyElem = document.getElementById('p2-cartas-qty');
   const boletosQtyElem = document.getElementById('p2-boletos-qty');
-  const cartasQty = cartasQtyElem ? Number(cartasQtyElem.value) || 0 : 0;
-  const boletosQty = boletosQtyElem ? Number(boletosQtyElem.value) || 0 : 0;
-  const afiExtraRegalos = (cartasQty * 2000) + (boletosQty * 400);
+  let cartasQty = cartasQtyElem ? Number(cartasQtyElem.value) || 0 : 0;
+  let boletosQty = boletosQtyElem ? Number(boletosQtyElem.value) || 0 : 0;
 
+  const zeroLvlTab2 = zeroSkillState[2];
+  
   const afiBaseNivel = ACUMULADO_HASTA_NIVEL[nivelSel - 1] || 0;
-  let afiAcumulada = afiBaseNivel + afiIngresada + afiExtraRegalos;
+  let afiAcumulada = afiBaseNivel + afiIngresada;
+  
+  const maxBondZeroThresholds = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 8 };
+  const maxBondZeroLevel = zeroLvlTab2 > 0 ? (maxBondZeroThresholds[zeroLvlTab2] || 0) : 0;
+  const afnZeroMeta = maxBondZeroLevel > 0 ? (ACUMULADO_HASTA_NIVEL[maxBondZeroLevel] || 0) : 0;
+
+  function getTab2UnitVal(baseUnit) {
+    return (zeroLvlTab2 > 0 && afnZeroMeta > 0 && afiAcumulada < afnZeroMeta) ? Math.round(baseUnit * 1.05) : baseUnit;
+  }
+
+  let cartasUsadas = 0;
+  for (let c = 0; c < cartasQty; c++) {
+    if (afiAcumulada >= AFINIDAD_MAX) break;
+    const valCarta = getTab2UnitVal(2000);
+    if (afiAcumulada + valCarta > AFINIDAD_MAX) {
+      if (afiAcumulada < AFINIDAD_MAX) {
+        afiAcumulada = AFINIDAD_MAX;
+        cartasUsadas++;
+      }
+      break;
+    }
+    afiAcumulada += valCarta;
+    cartasUsadas++;
+  }
+  if (cartasQty > 0 && cartasUsadas !== cartasQty) {
+    cartasQty = cartasUsadas;
+    if (cartasQtyElem) cartasQtyElem.value = cartasUsadas;
+  }
+
+  let boletosUsados = 0;
+  for (let b = 0; b < boletosQty; b++) {
+    if (afiAcumulada >= AFINIDAD_MAX) break;
+    const valBoleto = getTab2UnitVal(400);
+    if (afiAcumulada + valBoleto > AFINIDAD_MAX) {
+      if (afiAcumulada < AFINIDAD_MAX) {
+        afiAcumulada = AFINIDAD_MAX;
+        boletosUsados++;
+      }
+      break;
+    }
+    afiAcumulada += valBoleto;
+    boletosUsados++;
+  }
+  if (boletosQty > 0 && boletosUsados !== boletosQty) {
+    boletosQty = boletosUsados;
+    if (boletosQtyElem) boletosQtyElem.value = boletosUsados;
+  }
+
   if (afiAcumulada > AFINIDAD_MAX) afiAcumulada = AFINIDAD_MAX;
+
+  const levelContainer = document.getElementById('level-select-container');
+  const affinityContainer = document.getElementById('affinity-input-container');
+
+  if (levelContainer && affinityContainer && nivelSelect && afiActualInput) {
+    if (afiAcumulada >= AFINIDAD_MAX) {
+      nivelSelect.value = '10';
+      nivelSelect.disabled = true;
+      afiActualInput.disabled = true;
+      levelContainer.classList.add('level-locked');
+      affinityContainer.classList.add('input-locked');
+    } else {
+      nivelSelect.value = lastUserSelectedLevelTab2.toString();
+      nivelSelect.disabled = false;
+      afiActualInput.disabled = false;
+      levelContainer.classList.remove('level-locked');
+      affinityContainer.classList.remove('input-locked');
+    }
+  }
+
+  const estaEnRangoBuffVisual = zeroLvlTab2 > 0 && afnZeroMeta > 0 && afiAcumulada < afnZeroMeta;
+
+  const valorCartaSubLabel = estaEnRangoBuffVisual ? Math.round(2000 * 1.05) : 2000;
+  const valorBoletoSubLabel = estaEnRangoBuffVisual ? Math.round(400 * 1.05) : 400;
+
+  const cartaSubLabel = document.getElementById('p2-carta-sublabel');
+  const boletoSubLabel = document.getElementById('p2-boleto-sublabel');
+  if (cartaSubLabel) cartaSubLabel.innerText = `+${valorCartaSubLabel.toLocaleString('en-US')}`;
+  if (boletoSubLabel) boletoSubLabel.innerText = `+${valorBoletoSubLabel.toLocaleString('en-US')}`;
 
   const porcentaje = Math.min(100, Math.max(0, (afiAcumulada / AFINIDAD_MAX) * 100));
   const sparkbar = document.getElementById('sparkline-bar');
@@ -1556,8 +1943,8 @@ function recalculateTab2() {
   }
 
   [1, 2, 3].forEach(idx => {
-    const afiBase = selectedCharaTab2['affinity' + idx];
-    const costUnit = selectedCharaTab2['itemcost_' + idx];
+    const baseAfiUnit = Number(selectedCharaTab2['affinity' + idx]) || 0;
+    const costUnit = Number(selectedCharaTab2['itemcost_' + idx]) || 0;
     const nubeElem = document.getElementById('p2-nube' + idx);
     const usaNube = nubeElem ? nubeElem.checked : false;
 
@@ -1568,24 +1955,52 @@ function recalculateTab2() {
     let cantRegalos = 0;
     let costoTotal = 0;
 
+    const afiHeadValue = estaEnRangoBuffVisual ? Math.round(baseAfiUnit * 1.05) : baseAfiUnit;
+    const afiBufeadaUnit = Math.round(baseAfiUnit * 1.05);
+
     if (!tieneCita || !cuentaCita) {
-      const afiFaltanteItems = Math.max(0, AFINIDAD_MAX - afiAcumulada);
-      const afiRegalosDia = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
-      diasReq = afiRegalosDia > 0 ? Math.ceil(afiFaltanteItems / afiRegalosDia) : 0;
-      
-      const afiNubesTotal = usaNube ? (diasReq * 400) : 0;
-      const afiFaltanteRegalos = Math.max(0, AFINIDAD_MAX - afiAcumulada - afiNubesTotal);
-      cantRegalos = afiBase > 0 ? Math.ceil(afiFaltanteRegalos / afiBase) : 0;
-      costoTotal = cantRegalos * costUnit;
+      const regalosPorDia = usaNube ? 2 : 3;
+      const valorNubeBase = 400;
+      const valorNubeBufeada = 420;
+
+      let afiActualSim = afiAcumulada;
+      let diasSim = 0;
+      let regalosSim = 0;
+
+      while (afiActualSim < AFINIDAD_MAX && diasSim < 1000) {
+        diasSim++;
+        
+        const estaEnBuffSim = zeroLvlTab2 > 0 && afnZeroMeta > 0 && afiActualSim < afnZeroMeta;
+        const currentAfiRegalo = estaEnBuffSim ? afiBufeadaUnit : baseAfiUnit;
+        const currentNubeVal = usaNube ? (estaEnBuffSim ? valorNubeBufeada : valorNubeBase) : 0;
+        
+        for (let r = 0; r < regalosPorDia; r++) {
+          if (afiActualSim < AFINIDAD_MAX) {
+            afiActualSim += currentAfiRegalo;
+            regalosSim++;
+          }
+        }
+        
+        if (usaNube && afiActualSim < AFINIDAD_MAX) {
+          afiActualSim += currentNubeVal;
+        }
+      }
+
+      diasReq = diasSim;
+      cantRegalos = regalosSim;
     } else {
       let afnFaltanteTramo1 = Math.max(0, afnTramo1Meta - afiAcumulada);
       let afiAcumuladaDespuesTramo1 = Math.max(afnTramo1Meta, afiAcumulada);
       let afnFaltanteTramo2 = Math.max(0, AFINIDAD_MAX - afiAcumuladaDespuesTramo1);
 
-      let afiRegalosDiaT1 = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
+      let afiBaseT1 = getZeroBuffValue(zeroLvlTab2, Math.min(10, Math.max(1, umbralCita - 1)), baseAfiUnit);
+      let valorNubeT1 = (zeroLvlTab2 > 0 && umbralCita <= (maxBondZeroLevel + 1)) ? 420 : 400;
+      let afiRegalosDiaT1 = usaNube ? (afiBaseT1 * 2 + valorNubeT1) : (afiBaseT1 * 3);
       let diasT1 = afiRegalosDiaT1 > 0 ? Math.ceil(afnFaltanteTramo1 / afiRegalosDiaT1) : 0;
 
-      let afiRegalosDiaT2 = usaNube ? (afiBase * 2 + 400) : (afiBase * 3);
+      let afiBaseT2 = getZeroBuffValue(zeroLvlTab2, 10, baseAfiUnit);
+      let valorNubeT2 = 400;
+      let afiRegalosDiaT2 = usaNube ? (afiBaseT2 * 2 + valorNubeT2) : (afiBaseT2 * 3);
       let afiCitaDia = 200;
       let afiTotalDiaT2 = afiRegalosDiaT2 + afiCitaDia;
 
@@ -1596,13 +2011,24 @@ function recalculateTab2() {
 
       diasReq = diasT1 + diasT2;
 
-      let afiNubesTotal = usaNube ? (diasReq * 400) : 0;
-      let afiCitasTotal = diasT2 * 200;
-      let afiFaltanteRegalos = Math.max(0, AFINIDAD_MAX - afiAcumulada - afiNubesTotal - afiCitasTotal);
-      cantRegalos = afiBase > 0 ? Math.ceil(afiFaltanteRegalos / afiBase) : 0;
-      costoTotal = cantRegalos * costUnit;
+      let afiTotalGeneradaSinRegalos = (usaNube ? diasReq * 400 : 0) + (diasT2 * 200);
+      let afiNecesitadaEnRegalos = Math.max(0, (AFINIDAD_MAX - afiAcumulada) - afiTotalGeneradaSinRegalos);
+
+      if (zeroLvlTab2 > 0 && afnZeroMeta > 0) {
+        let afiTargetBuff = Math.min(afiNecesitadaEnRegalos, Math.max(0, afnZeroMeta - afiAcumulada));
+        let regalosT1Buff = afiBufeadaUnit > 0 ? Math.ceil(afiTargetBuff / afiBufeadaUnit) : 0;
+        let afiCubiertaT1 = regalosT1Buff * afiBufeadaUnit;
+
+        let afiRestanteNorm = Math.max(0, afiNecesitadaEnRegalos - afiCubiertaT1);
+        let regalosT2Norm = baseAfiUnit > 0 ? Math.ceil(afiRestanteNorm / baseAfiUnit) : 0;
+
+        cantRegalos = regalosT1Buff + regalosT2Norm;
+      } else {
+        cantRegalos = baseAfiUnit > 0 ? Math.ceil(afiNecesitadaEnRegalos / baseAfiUnit) : 0;
+      }
     }
 
+    costoTotal = cantRegalos * costUnit;
     const nubesTotalesUsadas = usaNube ? diasReq : 0;
 
     const headElem = document.getElementById(`p2-afi${idx}-head`);
@@ -1612,7 +2038,7 @@ function recalculateTab2() {
     const costTotalElem = document.getElementById(`p2-costototal${idx}`);
     const nubesUsadasElem = document.getElementById(`p2-nubesusadas${idx}`);
 
-    if (headElem) headElem.innerHTML = `${afiBase} <img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad">`;
+    if (headElem) headElem.innerHTML = `<img src="${AFFINITY_ICON_URL}" class="affinity-icon" alt="Afinidad"> ${afiHeadValue}`;
     if (cantElem) cantElem.innerText = cantRegalos;
     if (diasElem) diasElem.innerText = diasReq;
     if (costElem) costElem.innerHTML = costUnit.toLocaleString('en-US') + ` <img src="${FONS_ICON_URL}" class="fons-icon" alt="Fons">`;

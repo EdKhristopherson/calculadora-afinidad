@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Calculadora de Afinidad v1.3.2</title>
+  <title>Calculadora de Afinidad v1.3.7</title>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
       <div class="sidebar-top-content">
         <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center;">
           <h1 class="sidebar-title">
-            Calculadora <span class="version-tag">v1.3.2</span>
+            Calculadora <span class="version-tag">v1.3.7</span>
           </h1>
           <button class="sidebar-toggle-btn" id="toggleSidebarBtn" title="Contraer / Expandir barra lateral">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
@@ -40,7 +40,7 @@
           </button>
           <button class="nav-sidebar-btn" onclick="switchTab('tab-calcular', this)">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-            <span data-i18n="tabCalcular">Calcular Afinidad</span>
+            <span data-i18n="tabCalcular">Affinity Calculator</span>
           </button>
           <button class="nav-sidebar-btn" onclick="switchTab('tab-simulador', this)">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"></path></svg>
@@ -88,12 +88,24 @@
 
       <!-- PESTAÑA 1: PERSONAJES -->
       <div id="tab-personaje" class="tab-content">
-        <div class="page-header">
-          <h1 class="page-title" data-i18n="headerPersonajesTitle">GENERAL</h1>
-          <p class="page-description" data-i18n="headerPersonajesDesc">
-            Consulta la lista de personajes, sus bonos de afinidad desbloqueables y los requisitos de nivel para planificar tus recursos.
-          </p>
-          <hr class="header-divider">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h1 class="page-title" data-i18n="headerPersonajesTitle">GENERAL</h1>
+            <p class="page-description" data-i18n="headerPersonajesDesc">
+              Consulta la lista de personajes, sus bonos de afinidad desbloqueables y los requisitos de nivel para planificar tus recursos.
+            </p>
+          </div>
+          <div class="zero-skill-container" id="zero-skill-tab1">
+            <button type="button" class="zero-label-btn" onclick="toggleZeroSkillTab(1)" data-i18n="urbanSkill">Habilidad Urbana</button>
+            <div class="zero-buttons-group">
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(1, 1)">1</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(1, 2)">2</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(1, 3)">3</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(1, 4)">4</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(1, 5)">5</button>
+            </div>
+          </div>
+          <hr class="header-divider" style="width: 100%;">
         </div>
 
         <div class="grid-container">
@@ -145,12 +157,24 @@
 
       <!-- PESTAÑA 2: CALCULAR AFINIDAD -->
       <div id="tab-calcular" class="tab-content">
-        <div class="page-header">
-          <h1 class="page-title" data-i18n="headerCalcularTitle">CALCULAR AFINIDAD</h1>
-          <p class="page-description" data-i18n="headerCalcularDesc">
-            Calcula el tiempo estimado en días y el costo total en Fons según los regalos seleccionados, citas y nubes activadas.
-          </p>
-          <hr class="header-divider">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h1 class="page-title" data-i18n="headerCalcularTitle">CALCULAR AFINIDAD</h1>
+            <p class="page-description" data-i18n="headerCalcularDesc">
+              Calcula el tiempo estimado en días y el costo total en Fons según los regalos seleccionados, citas y nubes activadas.
+            </p>
+          </div>
+          <div class="zero-skill-container" id="zero-skill-tab2">
+            <button type="button" class="zero-label-btn" onclick="toggleZeroSkillTab(2)" data-i18n="urbanSkill">Habilidad Urbana</button>
+            <div class="zero-buttons-group">
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(2, 1)">1</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(2, 2)">2</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(2, 3)">3</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(2, 4)">4</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(2, 5)">5</button>
+            </div>
+          </div>
+          <hr class="header-divider" style="width: 100%;">
         </div>
 
         <div class="calc-layout-master">
@@ -177,27 +201,37 @@
                 <label style="font-size:12px; font-weight:700; color:var(--text-muted);" data-i18n="necesita">Se necesita</label>
                 <input type="text" id="p2-necesita" value="56,100" readonly style="font-weight:bold; margin-top:4px;">
                 
-                <label style="font-size:12px; margin-top:10px; display:block; font-weight:700; color:var(--text-muted);" data-i18n="nivel">Nivel</label>
-                <select id="p2-nivel" onchange="onNivelChangeTab2()" style="margin-top:4px;">
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                </select>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                  <label style="font-size:12px; font-weight:700; color:var(--text-muted);" data-i18n="nivel">Nivel</label>
+                  <button type="button" onclick="resetPerfilTab2()" title="Reiniciar nivel y afinidad" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                  </button>
+                </div>
+                <div class="select-wrapper" id="level-select-container">
+                  <select id="p2-nivel" onchange="onNivelChangeTab2()" style="margin-top:4px;">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10" hidden>10</option>
+                  </select>
+                </div>
 
                 <label style="font-size:12px; margin-top:10px; display:block; font-weight:700; color:var(--text-muted);" data-i18n="ingreseAfinidad">Ingrese su afinidad actual</label>
-                <input type="text" id="p2-afiactual" value="0" oninput="formatAndValidateAffinity(this);" style="margin-top:4px;">
+                <div class="input-lock-wrapper" id="affinity-input-container">
+                  <input type="text" id="p2-afiactual" value="0" oninput="formatAndValidateAffinity(this);" style="margin-top:4px;">
+                </div>
               </div>
 
               <div class="sim-gifts-box" style="width:100%; margin-top:12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                   <div class="section-title" style="margin:0;" data-i18n="regalosSinCondicion">REGALOS SIN CONDICIÓN</div>
-                  <button type="button" onclick="reiniciarRegalosTab2()" title="Reiniciar regalos a 0" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;" data-i18n="reiniciarRegalos">
+                  <button type="button" onclick="reiniciarRegalosTab2()" title="Reiniciar regalos a 0" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                   </button>
                 </div>
@@ -206,7 +240,7 @@
                   <img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta">
                   <div class="sim-gift-info">
                     <span class="sim-gift-name" data-i18n="cartaEscritaMano">Carta escrita a mano</span>
-                    <span class="sim-gift-val">+2,000 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
+                    <span class="sim-gift-val" id="p2-carta-sublabel"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> +2,000</span>
                   </div>
                   <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
                     <input type="number" id="p2-cartas-qty" value="0" min="0" oninput="recalculateTab2()">
@@ -217,7 +251,7 @@
                   <img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto">
                   <div class="sim-gift-info">
                     <span class="sim-gift-name" data-i18n="boletoCineFloe">Boleto del cine Floe</span>
-                    <span class="sim-gift-val">+400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></span>
+                    <span class="sim-gift-val" id="p2-boleto-sublabel"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> +400</span>
                   </div>
                   <div class="sim-gift-input-wrap" onclick="event.stopPropagation()">
                     <input type="number" id="p2-boletos-qty" value="0" min="0" oninput="recalculateTab2()">
@@ -235,7 +269,7 @@
               
               <div class="item-column">
                 <button class="save-btn-top" onclick="guardarEnReporte(1, event)" title="Añadir al reporte">+</button>
-                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi1-head">400</div>
+                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi1-head"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 400</div>
                 <div class="item-img-placeholder" id="p2-itemimg-1-container" style="margin-top: 8px;">
                   <span data-i18n="icono">[ Icono ]</span>
                 </div>
@@ -259,7 +293,7 @@
 
               <div class="item-column">
                 <button class="save-btn-top" onclick="guardarEnReporte(2, event)" title="Añadir al reporte">+</button>
-                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi2-head">200</div>
+                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi2-head"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 200</div>
                 <div class="item-img-placeholder" id="p2-itemimg-2-container" style="margin-top: 8px;">
                   <span data-i18n="icono">[ Icono ]</span>
                 </div>
@@ -283,7 +317,7 @@
 
               <div class="item-column">
                 <button class="save-btn-top" onclick="guardarEnReporte(3, event)" title="Añadir al reporte">+</button>
-                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi3-head">100</div>
+                <div class="item-header" style="font-size:22px; color:#38bdf8;" id="p2-afi3-head"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 100</div>
                 <div class="item-img-placeholder" id="p2-itemimg-3-container" style="margin-top: 8px;">
                   <span data-i18n="icono">[ Icono ]</span>
                 </div>
@@ -325,12 +359,24 @@
 
       <!-- PESTAÑA 3: SIMULADOR -->
       <div id="tab-simulador" class="tab-content">
-        <div class="page-header">
-          <h1 class="page-title" data-i18n="headerSimuladorTitle">SIMULADOR</h1>
-          <p class="page-description" data-i18n="headerSimuladorDesc">
-            Simula la progresión de nivel de cada personaje, ajusta la cantidad de regalos entregados y envía los datos directamente al calculador.
-          </p>
-          <hr class="header-divider">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h1 class="page-title" data-i18n="headerSimuladorTitle">SIMULADOR</h1>
+            <p class="page-description" data-i18n="headerSimuladorDesc">
+              Simula la progresión de nivel de cada personaje, ajusta la cantidad de regalos entregados y envía los datos directamente al calculador.
+            </p>
+          </div>
+          <div class="zero-skill-container" id="zero-skill-tab3">
+            <button type="button" class="zero-label-btn" onclick="toggleZeroSkillTab(3)" data-i18n="urbanSkill">Habilidad Urbana</button>
+            <div class="zero-buttons-group">
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(3, 1)">1</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(3, 2)">2</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(3, 3)">3</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(3, 4)">4</button>
+              <button type="button" class="zero-num-btn" onclick="setZeroSkillLevel(3, 5)">5</button>
+            </div>
+          </div>
+          <hr class="header-divider" style="width: 100%;">
         </div>
 
         <div class="sim-grid-layout">
@@ -338,14 +384,11 @@
           <!-- BLOQUE 1: PERSONAJE -->
           <div class="sim-block-character">
             <div class="sim-outfit-viewer" id="sim-outfit-viewer-container" style="position: relative;">
-              <!-- Imagen principal del outfit -->
               <img id="sim-outfit-img" src="" alt="Outfit" style="width: 100%; height: 100%; object-fit: contain; cursor: pointer;" onclick="openModal(this.src)">
               
-              <!-- Botones flotantes de navegación con Loop -->
               <button type="button" class="sim-skin-nav-btn sim-skin-prev" onclick="cambiarSkinSimulador(-1)" title="Skin anterior">‹</button>
               <button type="button" class="sim-skin-nav-btn sim-skin-next" onclick="cambiarSkinSimulador(1)" title="Siguiente skin">›</button>
 
-              <!-- Cajita translúcida inferior para el nombre del outfit -->
               <div class="sim-outfit-name-box" id="sim-outfit-name-label">Outfit</div>
             </div>
           </div>
@@ -357,12 +400,22 @@
             <div class="sim-inner-box sim-box-header">
               <div class="sim-chara-info-box">
                 <h2 id="sim-chara-name" class="sim-chara-title">Fadia</h2>
-                <span id="sim-chara-tag" class="sim-chara-sub">Miembro de UAC-2</span>
+                <div class="sim-chara-tag-box" id="sim-chara-tag-container">
+                  <span id="sim-chara-tag" class="sim-chara-sub">Miembro de UAC-2</span>
+                </div>
               </div>
               <div class="sim-level-circle-container">
-                <span class="sim-level-label">Afinidad</span>
-                <div class="sim-level-circle" id="sim-level-badge">1</div>
-                <span class="sim-exp-sub" id="sim-exp-sub">0</span>
+                <span class="sim-level-label" data-i18n="affinityLabelUpper">Afinidad</span>
+                <div class="sim-circle-wrapper">
+                  <svg class="sim-progress-ring" width="70" height="70">
+                    <circle class="ring-bg" cx="35" cy="35" r="28" stroke-width="5"></circle>
+                    <circle class="ring-fill" id="sim-circle-fill" cx="35" cy="35" r="28" stroke-width="5"></circle>
+                  </svg>
+                  <div class="sim-level-inner">
+                    <span id="sim-level-badge">1</span>
+                  </div>
+                </div>
+                <span class="sim-exp-sub" id="sim-exp-sub">0 / 100</span>
               </div>
             </div>
 
@@ -371,7 +424,7 @@
               
               <!-- CONTENEDOR 1: FAVORITOS -->
               <div class="sim-sub-box">
-                <div class="sim-pink-bar">FAVORITOS</div>
+                <div class="sim-pink-bar" data-i18n="favoritosTitle">FAVORITOS</div>
                 <div class="sim-fav-slots-row">
                   <div class="sim-slot-display"><img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta"></div>
                   <div class="sim-slot-display"><img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto"></div>
@@ -383,14 +436,14 @@
 
               <!-- CONTENEDOR 2: INVENTARIO -->
               <div class="sim-sub-box">
-                <div class="sim-pink-bar" style="background-color: #3b82f6;">INVENTARIO / REGALOS FALTANTES</div>
+                <div class="sim-pink-bar" style="background-color: #3b82f6;" data-i18n="inventarioTitle">INVENTARIO / REGALOS FALTANTES</div>
                 <div class="sim-inv-grid">
                   <div class="sim-slot-card">
                     <div class="sim-card-img-wrap">
                       <img src="https://lh3.googleusercontent.com/d/1C9x-jmc4PuFCqtxZh8xinbZj-oTKR6TX" alt="Carta">
                       <input type="number" id="sim-inv-cartas-qty" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer">2000 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-cartas-val"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 2000</div>
                   </div>
 
                   <div class="sim-slot-card">
@@ -398,7 +451,7 @@
                       <img src="https://lh3.googleusercontent.com/d/14PzrxqsRtv8vZU3cnme0eC2d40PinhVr" alt="Boleto">
                       <input type="number" id="sim-inv-boletos-qty" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-boletos-val"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 400</div>
                   </div>
 
                   <div class="sim-slot-card">
@@ -406,7 +459,7 @@
                       <img id="sim-inv-gift-img-1" src="" alt="Gift 1">
                       <input type="number" id="sim-inv-gift-qty-1" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer" id="sim-inv-gift-val-1">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-1"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 400</div>
                   </div>
 
                   <div class="sim-slot-card">
@@ -414,7 +467,7 @@
                       <img id="sim-inv-gift-img-2" src="" alt="Gift 2">
                       <input type="number" id="sim-inv-gift-qty-2" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer" id="sim-inv-gift-val-2">200 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-2"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 200</div>
                   </div>
 
                   <div class="sim-slot-card active-selection">
@@ -422,7 +475,7 @@
                       <img id="sim-inv-gift-img-3" src="" alt="Gift 3">
                       <input type="number" id="sim-inv-gift-qty-3" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer" id="sim-inv-gift-val-3">100 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-3"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 100</div>
                   </div>
 
                   <div class="sim-slot-card">
@@ -430,7 +483,7 @@
                       <img id="sim-inv-gift-img-4" src="https://lh3.googleusercontent.com/d/1dqQm82jdyCUIBGBTSEcaZVMZ4TMOuKPl" alt="Nuevo 1">
                       <input type="number" id="sim-inv-gift-qty-4" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-4"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 400</div>
                   </div>
 
                   <div class="sim-slot-card">
@@ -438,39 +491,51 @@
                       <img id="sim-inv-gift-img-5" src="https://lh3.googleusercontent.com/d/1kggvA_cInSaqtsSJOLKUZgoGuoplaifp" alt="Nuevo 2">
                       <input type="number" id="sim-inv-gift-qty-5" value="0" min="0" oninput="simRecalcular()">
                     </div>
-                    <div class="sim-affinity-footer">400 <img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"></div>
+                    <div class="sim-affinity-footer" id="sim-inv-gift-val-5"><img src="https://lh3.googleusercontent.com/d/16Yzy8DsFN4jdaacXLffYAI3MnZAxmmmT" class="affinity-icon" alt="Affinity"> 400</div>
                   </div>
                 </div>
               </div>
 
             </div>
 
-            <!-- CAJA 4: FOOTER / ACCIONES -->
+            <!-- CAJA 4: FOOTER / ACCIONES (CON ESTADO INICIAL INTEGRADO) -->
             <div class="sim-inner-box sim-box-footer">
               <div class="sim-bond-logo">BOND</div>
+              
+              <!-- SELECTOR DE NIVEL E INGRESO DE AFINIDAD ACTUAL COMPACTOS -->
+              <div class="sim-initial-state-container">
+                <div class="sim-init-field">
+                  <label for="sim-init-level" data-i18n="levelLabelShort">Nivel</label>
+                  <select id="sim-init-level" onchange="simRecalcular()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                </div>
+                <div class="sim-init-field">
+                  <label for="sim-init-affinity" data-i18n="affinityLabelShort">Afinidad</label>
+                  <input type="text" id="sim-init-affinity" value="0" oninput="formatAndValidateSimAffinity(this)">
+                </div>
+              </div>
+
+              <!-- BOTONES DE ACCIÓN (RESETEAR SVG + ENVIAR DATOS) -->
               <div class="sim-footer-buttons">
-                <button type="button" class="sim-btn-reset" onclick="simResetAll()" data-i18n="resetearSim">Resetear</button>
+                <button type="button" class="sim-btn-reset-icon" onclick="simResetAll()" title="Resetear">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                </button>
                 <button type="button" class="sim-btn-submit" onclick="simEnviarDatos()" data-i18n="enviarACalcular">Enviar datos</button>
               </div>
             </div>
 
-          </div>
-
-          <!-- BLOQUE 3: TABLA DE PROGRESIÓN -->
-          <div class="sim-block-table">
-            <div class="sim-table-header-title" data-i18n="tablaProgresion">TABLA DE PROGRESIÓN DE NIVEL</div>
-            <div class="sim-table-wrapper">
-              <table class="sim-progress-table">
-                <thead>
-                  <tr>
-                    <th data-i18n="nivel">NIVEL</th>
-                    <th data-i18n="afinidadAcumulada">AFINIDAD ACUMULADA</th>
-                    <th data-i18n="afinidadRequerida">AFINIDAD REQUERIDA</th>
-                  </tr>
-                </thead>
-                <tbody id="sim-table-body"></tbody>
-              </table>
-            </div>
           </div>
 
           <!-- BLOQUE 4: CARRUSEL VERTICAL -->
@@ -483,7 +548,7 @@
   </div>
 
   <div class="footer">
-    Calculadora de Afinidad v1.3.0 • Desarrollo en beta 
+    Calculadora de Afinidad v1.3.2 • Desarrollo en beta 
   </div>
 
   <script src="app.js"></script>
